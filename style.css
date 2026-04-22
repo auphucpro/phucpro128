@@ -1,0 +1,44 @@
+/* Toàn bộ giao diện được bóc tách sang đây */
+:root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --accent: #38bdf8;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+body { background: var(--bg); color: var(--text); padding-bottom: 80px; min-height: 100vh; }
+
+header { padding: 30px 20px; background: linear-gradient(to bottom, #1e293b, #0f172a); text-align: center; border-bottom: 1px solid #334155; }
+header h1 { font-size: 1.5rem; color: var(--accent); }
+header p { font-size: 0.85rem; color: var(--text-dim); margin-top: 5px; }
+
+.container { padding: 20px; }
+
+.tabs { display: flex; justify-content: space-around; background: var(--card); padding: 10px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #334155; }
+.tab-btn { background: none; border: none; color: var(--text-dim); padding: 10px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+.tab-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+
+.section { display: none; animation: fadeIn 0.4s ease; }
+.section.active { display: block; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.media-card { background: var(--card); border-radius: 20px; overflow: hidden; margin-bottom: 20px; border: 1px solid #334155; }
+video, audio { width: 100%; display: block; background: #000; }
+.music-art { padding: 40px; text-align: center; background: linear-gradient(45deg, #0f172a, #334155); font-size: 4rem; }
+.media-info { padding: 15px; }
+.media-info h3 { font-size: 1rem; margin-bottom: 5px; }
+.media-info p { font-size: 0.8rem; color: var(--text-dim); }
+
+.tools-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+.tool-item { background: var(--card); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #334155; cursor: pointer; }
+.tool-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
+.tool-name { font-size: 0.9rem; font-weight: 500; }
+
+#tool-output { margin-top: 20px; padding: 15px; background: #000; border-radius: 10px; font-size: 0.85rem; color: #10b981; display: none; }
+
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #334155; backdrop-filter: blur(10px); }
+.nav-item { color: var(--text-dim); text-decoration: none; font-size: 0.75rem; text-align: center; }
+.nav-item.active { color: var(--accent); }

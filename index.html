@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Personal Multi-Hub</title>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+</head>
+<body>
+
+    <header>
+        <h1>Personal Multi-Hub</h1>
+        <p id="weather-status">Hệ thống đang khởi động...</p>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('video')">Video</button>
+            <button class="tab-btn" onclick="switchTab('music')">Nhạc</button>
+            <button class="tab-btn" onclick="switchTab('tools')">Tiện ích</button>
+        </div>
+
+        <div id="video" class="section active">
+            <div class="media-card">
+                <video controls poster="https://via.placeholder.com/800x450/1e293b/ffffff?text=My+Video">
+                    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+                </video>
+                <div class="media-info">
+                    <h3>Video Thử Nghiệm 1</h3>
+                    <p>Nguồn: Cloud Storage</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="music" class="section">
+            <div class="media-card">
+                <div class="music-art">🎵</div>
+                <audio controls>
+                    <source src="https://www.w3schools.com/html/horse.mp3" type="audio/mpeg">
+                </audio>
+                <div class="media-info">
+                    <h3>Bản Nhạc Yêu Thích</h3>
+                    <p>Đang phát trực tuyến</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="tools" class="section">
+            <div class="tools-grid">
+                <div class="tool-item" onclick="getAIAdvice()">
+                    <span class="tool-icon">🧠</span>
+                    <span class="tool-name">AI Tư Vấn</span>
+                </div>
+                <div class="tool-item" onclick="getRandomWallpaper()">
+                    <span class="tool-icon">🖼️</span>
+                    <span class="tool-name">Ảnh Đẹp</span>
+                </div>
+                <div class="tool-item" onclick="alert('Đang kết nối API Coin...')">
+                    <span class="tool-icon">📈</span>
+                    <span class="tool-name">Giá Coin</span>
+                </div>
+                <div class="tool-item" onclick="alert('Đang kết nối API Weather...')">
+                    <span class="tool-icon">☁️</span>
+                    <span class="tool-name">Thời Tiết</span>
+                </div>
+            </div>
+            <div id="tool-output"></div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active">🏠<br>Trang chủ</div>
+        <div class="nav-item">📁<br>Tập tin</div>
+        <div class="nav-item" onclick="location.reload()">🔄<br>Làm mới</div>
+    </nav>
+
+    <script src="script.js"></script>
+</body>
+</html>
