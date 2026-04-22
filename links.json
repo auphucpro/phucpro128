@@ -1,0 +1,32 @@
+{
+  "videos": [
+    {
+      "id": "vid_1",
+      "title": "Video Đi Chơi Đà Lạt (Dùng file mp4 trong máy)",
+      "source": "Bộ nhớ nội bộ",
+      "url": "video_dalat_cua_sep.mp4",
+      "poster": "https://via.placeholder.com/800x450/1e293b/38bdf8?text=Da+Lat+Trip"
+    },
+    {
+      "id": "vid_2",
+      "title": "Phim Bom Tấn (Dùng link lấy từ trên mạng)",
+      "source": "Cloud Storage",
+      "url": "https://www.w3schools.com/html/mov_bbb.mp4",
+      "poster": "https://via.placeholder.com/800x450/1e293b/10b981?text=Phim+Bom+Tan"
+    }
+  ],
+  "music": [
+    {
+      "id": "mus_1",
+      "title": "Bản nhạc Remix của Sếp (File mp3 trong máy)",
+      "artist": "DJ Sếp",
+      "url": "nhac_remix.mp3"
+    },
+    {
+      "id": "mus_2",
+      "title": "Nhạc Lofi Thư Giãn (Link từ mạng)",
+      "artist": "Internet",
+      "url": "https://www.w3schools.com/html/horse.mp3"
+    }
+  ]
+}
