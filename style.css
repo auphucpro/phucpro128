@@ -1,44 +1,108 @@
-/* Toàn bộ giao diện được bóc tách sang đây */
 :root {
-    --bg: #0f172a;
-    --card: #1e293b;
+    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
     --accent: #38bdf8;
-    --text: #f1f5f9;
+    --text: #f8fafc;
     --text-dim: #94a3b8;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
-body { background: var(--bg); color: var(--text); padding-bottom: 80px; min-height: 100vh; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
 
-header { padding: 30px 20px; background: linear-gradient(to bottom, #1e293b, #0f172a); text-align: center; border-bottom: 1px solid #334155; }
-header h1 { font-size: 1.5rem; color: var(--accent); }
-header p { font-size: 0.85rem; color: var(--text-dim); margin-top: 5px; }
+/* Tăng padding-bottom để khi lướt không bị che bởi Mini-Player */
+body { 
+    background: var(--bg-gradient); 
+    color: var(--text); 
+    padding-bottom: 160px; 
+    min-height: 100vh; 
+    background-attachment: fixed;
+}
+
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+header { 
+    padding: 25px 20px 15px; 
+    text-align: center; 
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
+}
+header h1 { font-size: 1.6rem; color: #fff; letter-spacing: 0.5px; font-weight: 700; text-shadow: 0 2px 10px rgba(56, 189, 248, 0.3); }
+header p { font-size: 0.85rem; color: var(--accent); margin-top: 5px; font-weight: 500; }
 
 .container { padding: 20px; }
 
-.tabs { display: flex; justify-content: space-around; background: var(--card); padding: 10px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #334155; }
-.tab-btn { background: none; border: none; color: var(--text-dim); padding: 10px; font-weight: 600; cursor: pointer; transition: 0.3s; }
-.tab-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+.tabs { display: flex; justify-content: space-around; padding: 6px; margin-bottom: 25px; border-radius: 99px; }
+.tab-btn { background: none; border: none; color: var(--text-dim); padding: 12px 20px; font-weight: 600; cursor: pointer; transition: 0.3s; border-radius: 99px; width: 33%; }
+.tab-btn.active { background: rgba(255, 255, 255, 0.1); color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
-.section { display: none; animation: fadeIn 0.4s ease; }
+.section { display: none; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 .section.active { display: block; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.media-grid { display: grid; gap: 20px; }
+.media-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 28px; overflow: hidden; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: transform 0.2s; }
+.media-card:active { transform: scale(0.98); }
 
-.media-card { background: var(--card); border-radius: 20px; overflow: hidden; margin-bottom: 20px; border: 1px solid #334155; }
-video, audio { width: 100%; display: block; background: #000; }
-.music-art { padding: 40px; text-align: center; background: linear-gradient(45deg, #0f172a, #334155); font-size: 4rem; }
-.media-info { padding: 15px; }
-.media-info h3 { font-size: 1rem; margin-bottom: 5px; }
-.media-info p { font-size: 0.8rem; color: var(--text-dim); }
+video, audio { width: 100%; display: block; background: #000; border-bottom: 1px solid var(--glass-border); outline: none; }
+.music-art { padding: 50px; text-align: center; background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(139, 92, 246, 0.2)); font-size: 4rem; text-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+.media-info { padding: 18px; }
+.media-info h3 { font-size: 1.1rem; margin-bottom: 6px; font-weight: 600; color: #fff; }
+.media-info p { font-size: 0.85rem; color: var(--text-dim); }
+
+.audio-btn { background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid var(--glass-border); padding: 10px 15px; border-radius: 12px; margin-top: 12px; font-size: 0.85rem; font-weight: 600; cursor: pointer; width: 100%; transition: 0.3s; }
+.audio-btn:active { background: rgba(255, 255, 255, 0.2); }
 
 .tools-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-.tool-item { background: var(--card); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #334155; cursor: pointer; }
-.tool-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
-.tool-name { font-size: 0.9rem; font-weight: 500; }
+.tool-item { padding: 25px 15px; text-align: center; cursor: pointer; transition: 0.2s; }
+.tool-item:active { transform: scale(0.95); }
+.tool-icon { font-size: 2.2rem; margin-bottom: 12px; display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
+.tool-name { font-size: 0.95rem; font-weight: 600; }
 
-#tool-output { margin-top: 20px; padding: 15px; background: #000; border-radius: 10px; font-size: 0.85rem; color: #10b981; display: none; }
-
-.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #334155; backdrop-filter: blur(10px); }
-.nav-item { color: var(--text-dim); text-decoration: none; font-size: 0.75rem; text-align: center; }
+.bottom-nav { position: fixed; bottom: 15px; left: 15px; right: 15px; display: flex; justify-content: space-around; padding: 15px; border-radius: 24px; z-index: 100; }
+.nav-item { color: var(--text-dim); text-decoration: none; font-size: 0.75rem; text-align: center; font-weight: 600; }
 .nav-item.active { color: var(--accent); }
+
+/* --- CSS MỚI: TRÌNH PHÁT NỀN MINI (MINI PLAYER) --- */
+#mini-player {
+    position: fixed;
+    bottom: 90px; /* Căn nằm ngay trên thanh Bottom Nav */
+    left: 15px; right: 15px;
+    display: flex; align-items: center; padding: 12px 15px;
+    z-index: 95; border-radius: 20px;
+    background: rgba(15, 23, 42, 0.9); /* Làm tối hơn chút để nổi bật */
+    animation: slideUpMini 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes slideUpMini { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.mini-art { width: 45px; height: 45px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), #8b5cf6); display: flex; justify-content: center; align-items: center; font-size: 1.4rem; margin-right: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+.mini-info { flex: 1; overflow: hidden; white-space: nowrap; }
+.mini-title { font-size: 1rem; font-weight: 600; color: #fff; text-overflow: ellipsis; overflow: hidden; margin-bottom: 3px; }
+.mini-artist { font-size: 0.8rem; color: var(--accent); text-overflow: ellipsis; overflow: hidden; }
+.mini-controls { display: flex; gap: 15px; align-items: center; margin-left: 10px; }
+.mini-btn { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; padding: 5px; transition: transform 0.2s; }
+.mini-btn:active { transform: scale(0.8); }
+.mini-btn.close-btn { font-size: 1.2rem; color: var(--text-dim); }
+
+/* Modal Styles */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 1000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.3s ease; padding: 20px; }
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+.modal-content { width: 100%; max-width: 400px; padding: 30px 25px; transform: translateY(30px); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.modal-overlay.active .modal-content { transform: translateY(0); }
+.glass-input { width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); color: #fff; padding: 14px 16px; border-radius: 16px; margin-bottom: 15px; font-size: 1rem; outline: none; transition: 0.3s; }
+.glass-input:focus { border-color: var(--accent); background: rgba(0, 0, 0, 0.5); }
+.glass-input::placeholder { color: #64748b; }
+select.glass-input { appearance: none; color: #fff; }
+.btn { flex: 1; padding: 14px; border-radius: 16px; font-weight: 600; font-size: 1rem; cursor: pointer; border: none; transition: 0.2s; }
+.btn-cancel { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.btn-primary { background: var(--accent); color: #000; }
+.btn-success { background: #10b981; color: #000; }
+.btn:active { transform: scale(0.95); opacity: 0.8; }

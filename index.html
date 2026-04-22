@@ -3,76 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Personal Multi-Hub</title>
-    
+    <title>Multi Phục Pro P.128</title>
     <link rel="stylesheet" href="style.css">
-    
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#0a0a0f">
 </head>
 <body>
 
-    <header>
-        <h1>Personal Multi-Hub</h1>
-        <p id="weather-status">Hệ thống đang khởi động...</p>
+    <header onclick="secretKnock()">
+        <h1>Multi Phục Pro P.128</h1>
+        <p id="weather-status">Đang đồng bộ dữ liệu...</p>
     </header>
 
     <div class="container">
-        <div class="tabs">
+        <div class="tabs glass-panel">
             <button class="tab-btn active" onclick="switchTab('video')">Video</button>
             <button class="tab-btn" onclick="switchTab('music')">Nhạc</button>
             <button class="tab-btn" onclick="switchTab('tools')">Tiện ích</button>
         </div>
 
         <div id="video" class="section active">
-            <div class="media-card">
-                <video controls poster="https://via.placeholder.com/800x450/1e293b/ffffff?text=My+Video">
-                    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-                </video>
-                <div class="media-info">
-                    <h3>Video Thử Nghiệm 1</h3>
-                    <p>Nguồn: Cloud Storage</p>
-                </div>
-            </div>
+            <div id="video-container" class="media-grid"></div>
         </div>
 
         <div id="music" class="section">
-            <div class="media-card">
-                <div class="music-art">🎵</div>
-                <audio controls>
-                    <source src="https://www.w3schools.com/html/horse.mp3" type="audio/mpeg">
-                </audio>
-                <div class="media-info">
-                    <h3>Bản Nhạc Yêu Thích</h3>
-                    <p>Đang phát trực tuyến</p>
-                </div>
-            </div>
+            <div id="music-container" class="media-grid"></div>
         </div>
 
         <div id="tools" class="section">
             <div class="tools-grid">
-                <div class="tool-item" onclick="getAIAdvice()">
+                <div class="tool-item glass-panel" onclick="fetchTrendingMusic()">
+                    <span class="tool-icon">🔥</span>
+                    <span class="tool-name">Nhạc Thịnh Hành</span>
+                </div>
+                <div class="tool-item glass-panel" onclick="fetchOnlineVideos()">
+                    <span class="tool-icon">🌍</span>
+                    <span class="tool-name">Khám Phá Video</span>
+                </div>
+                <div class="tool-item glass-panel" onclick="getAIAdvice()">
                     <span class="tool-icon">🧠</span>
-                    <span class="tool-name">AI Tư Vấn</span>
+                    <span class="tool-name">AI Trợ Lý</span>
                 </div>
-                <div class="tool-item" onclick="getRandomWallpaper()">
+                <div class="tool-item glass-panel" onclick="getRandomWallpaper()">
                     <span class="tool-icon">🖼️</span>
-                    <span class="tool-name">Ảnh Đẹp</span>
-                </div>
-                <div class="tool-item" onclick="alert('Đang kết nối API Coin...')">
-                    <span class="tool-icon">📈</span>
-                    <span class="tool-name">Giá Coin</span>
-                </div>
-                <div class="tool-item" onclick="alert('Đang kết nối API Weather...')">
-                    <span class="tool-icon">☁️</span>
-                    <span class="tool-name">Thời Tiết</span>
+                    <span class="tool-name">Ảnh Nghệ Thuật</span>
                 </div>
             </div>
-            <div id="tool-output"></div>
+            <div id="tool-output" class="glass-panel" style="display: none; margin-top: 20px; color: #34d399; font-size: 0.9rem; line-height: 1.5;"></div>
         </div>
     </div>
 
-    <nav class="bottom-nav">
+    <div id="mini-player" class="glass-panel" style="display: none;">
+        <div class="mini-art" id="mini-icon">🎵</div>
+        <div class="mini-info">
+            <div class="mini-title" id="mini-title">Đang phát...</div>
+            <div class="mini-artist" id="mini-artist">Multi Phục Pro P.128</div>
+        </div>
+        <div class="mini-controls">
+            <button class="mini-btn" id="mini-playpause" onclick="toggleMiniPlayer()">⏸️</button>
+            <button class="mini-btn close-btn" onclick="closeMiniPlayer()">✖</button>
+        </div>
+    </div>
+
+    <div id="admin-login-modal" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <h2>🔐 Quyền Quản Trị</h2>
+            <p style="margin-bottom: 20px; font-size: 0.9rem; color: #a1a1aa;">Vui lòng nhập mã PIN để truy cập</p>
+            <input type="password" id="admin-pin" class="glass-input" placeholder="Nhập mã PIN..." inputmode="numeric">
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-cancel" onclick="closeAdminLogin()">Hủy</button>
+                <button class="btn btn-primary" onclick="verifyAdmin()">Mở Khóa</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-panel-modal" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <h2>➕ Thêm Media Mới</h2>
+            <p style="margin-bottom: 15px; font-size: 0.85rem; color: #a1a1aa;">Dữ liệu sẽ được lưu bí mật trên thiết bị này.</p>
+            <select id="media-type" class="glass-input">
+                <option value="video">🎥 Thêm Video</option>
+                <option value="music">🎵 Thêm Bài Nhạc</option>
+            </select>
+            <input type="text" id="media-title" class="glass-input" placeholder="Tiêu đề (VD: Phim hành động / Tên bài hát)">
+            <input type="text" id="media-author" class="glass-input" placeholder="Nguồn / Tên Ca sĩ">
+            <input type="text" id="media-url" class="glass-input" placeholder="Dán Link .mp4 hoặc .mp3 vào đây...">
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-cancel" onclick="closeAdminPanel()">Đóng</button>
+                <button class="btn btn-success" onclick="saveCustomMedia()">Lưu Dữ Liệu</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav glass-panel">
         <div class="nav-item active">🏠<br>Trang chủ</div>
         <div class="nav-item">📁<br>Tập tin</div>
         <div class="nav-item" onclick="location.reload()">🔄<br>Làm mới</div>

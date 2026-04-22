@@ -1,13 +1,13 @@
 {
-  "name": "API Expert Dashboard",
-  "short_name": "APIExpert",
+  "name": "Tiện Ích PHỤC PRO P.128",
+  "short_name": "P128",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#0d1117",
-  "theme_color": "#58a6ff",
+  "background_color": "#0f172a",
+  "theme_color": "#38bdf8",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2583/2583344.png",
+      "https://www.flaticon.com/free-icon/like_4406142": "https://cdn-icons-png.flaticon.com/512/3845/3845868.png",
       "sizes": "512x512",
       "type": "image/png"
     }
