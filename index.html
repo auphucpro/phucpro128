@@ -7,12 +7,13 @@
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0a0a0f">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3845/3845868.png">
 </head>
 <body>
 
     <header onclick="secretKnock()">
         <h1>Multi Phục Pro P.128</h1>
-        <p id="weather-status">Đang đồng bộ dữ liệu...</p>
+        <p id="weather-status">Hệ thống đang sẵn sàng...</p>
     </header>
 
     <div class="container">
@@ -32,24 +33,24 @@
 
         <div id="tools" class="section">
             <div class="tools-grid">
-                <div class="tool-item glass-panel" onclick="fetchTrendingMusic()">
-                    <span class="tool-icon">🔥</span>
-                    <span class="tool-name">Nhạc Thịnh Hành</span>
+                <div class="tool-item glass-panel" id="install-card" style="display:none;" onclick="triggerInstall()">
+                    <span class="tool-icon">📲</span>
+                    <span class="tool-name">Cài đặt App</span>
                 </div>
-                <div class="tool-item glass-panel" onclick="fetchOnlineVideos()">
-                    <span class="tool-icon">🌍</span>
-                    <span class="tool-name">Khám Phá Video</span>
+                <div class="tool-item glass-panel" onclick="fetchNCTMusic()">
+                    <span class="tool-icon">🎧</span>
+                    <span class="tool-name">NCT Trending</span>
+                </div>
+                <div class="tool-item glass-panel" onclick="fetchTikTokVideos()">
+                    <span class="tool-icon">📱</span>
+                    <span class="tool-name">TikTok Nổi Bật</span>
                 </div>
                 <div class="tool-item glass-panel" onclick="getAIAdvice()">
                     <span class="tool-icon">🧠</span>
                     <span class="tool-name">AI Trợ Lý</span>
                 </div>
-                <div class="tool-item glass-panel" onclick="getRandomWallpaper()">
-                    <span class="tool-icon">🖼️</span>
-                    <span class="tool-name">Ảnh Nghệ Thuật</span>
-                </div>
             </div>
-            <div id="tool-output" class="glass-panel" style="display: none; margin-top: 20px; color: #34d399; font-size: 0.9rem; line-height: 1.5;"></div>
+            <div id="tool-output" class="glass-panel" style="display: none; margin-top: 20px;"></div>
         </div>
     </div>
 
@@ -57,19 +58,27 @@
         <div class="mini-art" id="mini-icon">🎵</div>
         <div class="mini-info">
             <div class="mini-title" id="mini-title">Đang phát...</div>
-            <div class="mini-artist" id="mini-artist">Multi Phục Pro P.128</div>
+            <div class="mini-artist" id="mini-artist">Multi Phục Pro</div>
         </div>
         <div class="mini-controls">
-            <button class="mini-btn" id="mini-playpause" onclick="toggleMiniPlayer()">⏸️</button>
+            <button class="mini-btn" id="pip-btn" onclick="togglePiP()">🖼️</button>
+            <button class="mini-btn" onclick="toggleMiniPlayer()" id="mini-pp-icon">⏸️</button>
             <button class="mini-btn close-btn" onclick="closeMiniPlayer()">✖</button>
+        </div>
+    </div>
+
+    <div id="custom-alert" class="modal-overlay">
+        <div class="alert-box glass-panel">
+            <div class="alert-header">👑 Chào Sếp Phục Pro</div>
+            <div class="alert-body" id="alert-message">Nội dung thông báo</div>
+            <button class="alert-btn" onclick="closeAlert()">Đã Rõ</button>
         </div>
     </div>
 
     <div id="admin-login-modal" class="modal-overlay">
         <div class="modal-content glass-panel">
-            <h2>🔐 Quyền Quản Trị</h2>
-            <p style="margin-bottom: 20px; font-size: 0.9rem; color: #a1a1aa;">Vui lòng nhập mã PIN để truy cập</p>
-            <input type="password" id="admin-pin" class="glass-input" placeholder="Nhập mã PIN..." inputmode="numeric">
+            <h2>🔐 Admin Login</h2>
+            <input type="password" id="admin-pin" class="glass-input" placeholder="Nhập PIN..." inputmode="numeric">
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button class="btn btn-cancel" onclick="closeAdminLogin()">Hủy</button>
                 <button class="btn btn-primary" onclick="verifyAdmin()">Mở Khóa</button>
@@ -79,18 +88,17 @@
 
     <div id="admin-panel-modal" class="modal-overlay">
         <div class="modal-content glass-panel">
-            <h2>➕ Thêm Media Mới</h2>
-            <p style="margin-bottom: 15px; font-size: 0.85rem; color: #a1a1aa;">Dữ liệu sẽ được lưu bí mật trên thiết bị này.</p>
+            <h2>➕ Thêm Media</h2>
             <select id="media-type" class="glass-input">
-                <option value="video">🎥 Thêm Video</option>
-                <option value="music">🎵 Thêm Bài Nhạc</option>
+                <option value="video">🎥 Video</option>
+                <option value="music">🎵 Nhạc</option>
             </select>
-            <input type="text" id="media-title" class="glass-input" placeholder="Tiêu đề (VD: Phim hành động / Tên bài hát)">
-            <input type="text" id="media-author" class="glass-input" placeholder="Nguồn / Tên Ca sĩ">
-            <input type="text" id="media-url" class="glass-input" placeholder="Dán Link .mp4 hoặc .mp3 vào đây...">
+            <input type="text" id="media-title" class="glass-input" placeholder="Tiêu đề">
+            <input type="text" id="media-author" class="glass-input" placeholder="Tác giả">
+            <input type="text" id="media-url" class="glass-input" placeholder="Link (mp4/mp3)">
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button class="btn btn-cancel" onclick="closeAdminPanel()">Đóng</button>
-                <button class="btn btn-success" onclick="saveCustomMedia()">Lưu Dữ Liệu</button>
+                <button class="btn btn-success" onclick="saveCustomMedia()">Lưu</button>
             </div>
         </div>
     </div>
