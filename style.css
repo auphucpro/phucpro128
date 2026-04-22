@@ -1,108 +1,70 @@
 :root {
-    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    --bg-gradient: linear-gradient(135deg, #07070a 0%, #11111d 100%);
     --glass-bg: rgba(255, 255, 255, 0.05);
     --glass-border: rgba(255, 255, 255, 0.1);
     --accent: #38bdf8;
     --text: #f8fafc;
-    --text-dim: #94a3b8;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+body { background: var(--bg-gradient); color: var(--text); padding-bottom: 180px; min-height: 100vh; background-attachment: fixed; }
 
-/* Tăng padding-bottom để khi lướt không bị che bởi Mini-Player */
-body { 
-    background: var(--bg-gradient); 
-    color: var(--text); 
-    padding-bottom: 160px; 
-    min-height: 100vh; 
-    background-attachment: fixed;
-}
+.glass-panel { background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 28px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
 
-.glass-panel {
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
+header { padding: 30px 20px 15px; text-align: center; position: sticky; top: 0; z-index: 100; background: rgba(10, 10, 15, 0.8); backdrop-filter: blur(15px); }
+header h1 { font-size: 1.6rem; font-weight: 800; color: #fff; text-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
 
-header { 
-    padding: 25px 20px 15px; 
-    text-align: center; 
-    position: sticky; top: 0; z-index: 10;
-    background: rgba(15, 23, 42, 0.7);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--glass-border);
-}
-header h1 { font-size: 1.6rem; color: #fff; letter-spacing: 0.5px; font-weight: 700; text-shadow: 0 2px 10px rgba(56, 189, 248, 0.3); }
-header p { font-size: 0.85rem; color: var(--accent); margin-top: 5px; font-weight: 500; }
-
-.container { padding: 20px; }
-
-.tabs { display: flex; justify-content: space-around; padding: 6px; margin-bottom: 25px; border-radius: 99px; }
-.tab-btn { background: none; border: none; color: var(--text-dim); padding: 12px 20px; font-weight: 600; cursor: pointer; transition: 0.3s; border-radius: 99px; width: 33%; }
-.tab-btn.active { background: rgba(255, 255, 255, 0.1); color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-
-.section { display: none; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-.section.active { display: block; }
-@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.container { padding: 15px; }
+.tabs { display: flex; padding: 5px; margin-bottom: 25px; border-radius: 50px; }
+.tab-btn { flex: 1; background: none; border: none; color: #94a3b8; padding: 12px; font-weight: 700; border-radius: 50px; transition: 0.3s; }
+.tab-btn.active { background: rgba(255,255,255,0.1); color: var(--accent); }
 
 .media-grid { display: grid; gap: 20px; }
-.media-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 28px; overflow: hidden; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: transform 0.2s; }
-.media-card:active { transform: scale(0.98); }
+.media-card { background: var(--glass-bg); border-radius: 32px; overflow: hidden; border: 1px solid var(--glass-border); position: relative; }
 
-video, audio { width: 100%; display: block; background: #000; border-bottom: 1px solid var(--glass-border); outline: none; }
-.music-art { padding: 50px; text-align: center; background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(139, 92, 246, 0.2)); font-size: 4rem; text-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-.media-info { padding: 18px; }
-.media-info h3 { font-size: 1.1rem; margin-bottom: 6px; font-weight: 600; color: #fff; }
-.media-info p { font-size: 0.85rem; color: var(--text-dim); }
+/* Ẩn hoàn toàn thẻ audio/video controls mặc định trắng nhở nhạt */
+video::-webkit-media-controls, audio::-webkit-media-controls { display: none !important; }
+video { width: 100%; display: block; background: #000; aspect-ratio: 16/9; object-fit: cover; }
 
-.audio-btn { background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid var(--glass-border); padding: 10px 15px; border-radius: 12px; margin-top: 12px; font-size: 0.85rem; font-weight: 600; cursor: pointer; width: 100%; transition: 0.3s; }
-.audio-btn:active { background: rgba(255, 255, 255, 0.2); }
+/* Custom Player Controls thay thế */
+.custom-player-ui { position: absolute; top: 0; left: 0; right: 0; height: 160px; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.4); opacity: 0; transition: 0.3s; }
+.media-card:hover .custom-player-ui { opacity: 1; }
+.play-circle { width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: #fff; border: 1px solid rgba(255,255,255,0.5); cursor: pointer; }
 
-.tools-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-.tool-item { padding: 25px 15px; text-align: center; cursor: pointer; transition: 0.2s; }
-.tool-item:active { transform: scale(0.95); }
-.tool-icon { font-size: 2.2rem; margin-bottom: 12px; display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
-.tool-name { font-size: 0.95rem; font-weight: 600; }
+.media-info { padding: 20px; z-index: 2; position: relative; }
+.media-info h3 { font-size: 1.1rem; margin-bottom: 5px; }
+.audio-btn { background: var(--accent); color: #000; border: none; padding: 10px; border-radius: 14px; margin-top: 10px; width: 100%; font-weight: 700; cursor: pointer; }
 
-.bottom-nav { position: fixed; bottom: 15px; left: 15px; right: 15px; display: flex; justify-content: space-around; padding: 15px; border-radius: 24px; z-index: 100; }
-.nav-item { color: var(--text-dim); text-decoration: none; font-size: 0.75rem; text-align: center; font-weight: 600; }
+.music-art { padding: 50px; text-align: center; background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(139, 92, 246, 0.2)); font-size: 4rem; position: relative; }
+
+#mini-player { position: fixed; bottom: 95px; left: 15px; right: 15px; display: flex; align-items: center; padding: 12px; z-index: 150; }
+.mini-art { width: 48px; height: 48px; border-radius: 15px; background: var(--accent); display: flex; justify-content: center; align-items: center; font-size: 1.5rem; }
+.mini-info { flex: 1; margin-left: 12px; overflow: hidden; }
+.mini-title { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini-controls { display: flex; gap: 10px; }
+.mini-btn { background: none; border: none; color: #fff; font-size: 1.4rem; cursor: pointer; }
+
+.tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.tool-item { padding: 25px 10px; text-align: center; cursor: pointer; }
+
+.bottom-nav { position: fixed; bottom: 15px; left: 15px; right: 15px; display: flex; justify-content: space-around; padding: 15px; z-index: 200; }
+.nav-item { color: #94a3b8; font-size: 0.7rem; font-weight: 700; text-align: center; }
 .nav-item.active { color: var(--accent); }
 
-/* --- CSS MỚI: TRÌNH PHÁT NỀN MINI (MINI PLAYER) --- */
-#mini-player {
-    position: fixed;
-    bottom: 90px; /* Căn nằm ngay trên thanh Bottom Nav */
-    left: 15px; right: 15px;
-    display: flex; align-items: center; padding: 12px 15px;
-    z-index: 95; border-radius: 20px;
-    background: rgba(15, 23, 42, 0.9); /* Làm tối hơn chút để nổi bật */
-    animation: slideUpMini 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-@keyframes slideUpMini { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-.mini-art { width: 45px; height: 45px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), #8b5cf6); display: flex; justify-content: center; align-items: center; font-size: 1.4rem; margin-right: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-.mini-info { flex: 1; overflow: hidden; white-space: nowrap; }
-.mini-title { font-size: 1rem; font-weight: 600; color: #fff; text-overflow: ellipsis; overflow: hidden; margin-bottom: 3px; }
-.mini-artist { font-size: 0.8rem; color: var(--accent); text-overflow: ellipsis; overflow: hidden; }
-.mini-controls { display: flex; gap: 15px; align-items: center; margin-left: 10px; }
-.mini-btn { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; padding: 5px; transition: transform 0.2s; }
-.mini-btn:active { transform: scale(0.8); }
-.mini-btn.close-btn { font-size: 1.2rem; color: var(--text-dim); }
+/* --- CSS BẢNG THÔNG BÁO CUSTOM CHUẨN SẾP --- */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px; }
+.modal-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* Modal Styles */
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 1000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.3s ease; padding: 20px; }
-.modal-overlay.active { opacity: 1; pointer-events: auto; }
-.modal-content { width: 100%; max-width: 400px; padding: 30px 25px; transform: translateY(30px); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-.modal-overlay.active .modal-content { transform: translateY(0); }
-.glass-input { width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); color: #fff; padding: 14px 16px; border-radius: 16px; margin-bottom: 15px; font-size: 1rem; outline: none; transition: 0.3s; }
-.glass-input:focus { border-color: var(--accent); background: rgba(0, 0, 0, 0.5); }
-.glass-input::placeholder { color: #64748b; }
-select.glass-input { appearance: none; color: #fff; }
-.btn { flex: 1; padding: 14px; border-radius: 16px; font-weight: 600; font-size: 1rem; cursor: pointer; border: none; transition: 0.2s; }
-.btn-cancel { background: rgba(255, 255, 255, 0.1); color: #fff; }
-.btn-primary { background: var(--accent); color: #000; }
-.btn-success { background: #10b981; color: #000; }
-.btn:active { transform: scale(0.95); opacity: 0.8; }
+.alert-box { width: 100%; max-width: 320px; padding: 25px; text-align: center; transform: scale(0.9); animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+@keyframes popUp { to { transform: scale(1); } }
+.alert-header { font-size: 1.1rem; font-weight: 800; color: var(--accent); margin-bottom: 12px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
+.alert-body { font-size: 0.95rem; line-height: 1.6; margin-bottom: 25px; color: #e2e8f0; }
+.alert-btn { background: var(--accent); color: #000; border: none; padding: 12px 30px; border-radius: 20px; font-weight: 800; width: 100%; cursor: pointer; }
+
+.modal-content { width: 100%; max-width: 350px; padding: 30px; }
+.glass-input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: #fff; padding: 15px; border-radius: 18px; margin-bottom: 12px; }
+.btn { flex: 1; padding: 15px; border-radius: 18px; border: none; font-weight: 800; cursor: pointer; }
+.btn-primary { background: var(--accent); }
+.btn-cancel { background: #333; color: #fff; }
+.btn-success { background: #10b981; }
