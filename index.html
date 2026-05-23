@@ -3,112 +3,3008 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Multi Phục Pro P.128</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0a0a0f">
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3845/3845868.png">
+    <title>TÚ TRINH NGUYỄN - Quản Lý Tài Chính</title>
+    <link rel="icon" href="./logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="./logo.png">
+    <link rel="manifest" href="./manifest.json">
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
+    
+    <style>
+        :root {
+            --bg-start: #e2effd;
+            --bg-mid: #d0e7ff;
+            --bg-end: #ecf5fc;
+            --glass: rgba(255,255,255,0.45);
+            --glass-border: rgba(255,255,255,0.65);
+            --glass-shadow: 0 8px 32px rgba(26,127,255,0.08);
+            --blue: #1a7fff;
+            --blue-dark: #0057d9;
+            --blue-light: #5aaeff;
+            --green: #27c96a;
+            --red: #ff3b5c;
+            --orange: #ff9f0a;
+            --gray: #6b8299;
+            --text: #162535;
+            --text-sub: #526b85;
+            
+            /* ĐỊNH NGHĨA BO TRÒN SÂU (DEEP ROUNDED) */
+            --radius-xl: 28px;
+            --radius: 24px;
+            --radius-sm: 18px;
+            --radius-xs: 12px;
+        }
+
+        * { -webkit-tap-highlight-color: transparent !important; outline: none !important; box-sizing: border-box; }
+
+        body {
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%);
+            color: var(--text);
+            margin: 0; padding: 0;
+            -webkit-font-smoothing: antialiased;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(100,180,255,0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(80,160,255,0.12) 0%, transparent 60%);
+            pointer-events: none; z-index: 0;
+            will-change: transform;
+        }
+
+        .app-container {
+            max-width: 480px; margin: 0 auto;
+            min-height: 100vh; position: relative;
+            padding-bottom: 70px; padding-top: 72px; overflow-x: hidden;
+            z-index: 1;
+        }
+
+        /* ===== HIỆU ỨNG KÍNH MỜ CHUẨN ĐẸP ===== */
+        .glass-blur {
+            background: rgba(255, 255, 255, 0.45) !important;
+            backdrop-filter: blur(12px) saturate(140%) !important;
+            -webkit-backdrop-filter: blur(12px) saturate(140%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.65) !important;
+            box-shadow: var(--glass-shadow) !important;
+        }
+
+        /* ===== HEADER & FOOTER KÍNH MỜ ===== */
+        .header {
+            background: transparent;
+            padding: 12px 16px 10px 16px;
+            position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 10px;
+            box-shadow: none; border: none;
+            will-change: transform;
+        }
+                /* Viên thuốc kính mờ cho tiêu đề - ĐÃ SỬA LỖI CẤN DẤU VÀ TRÀN NÉT CHỮ */
+        .header-pill {
+            flex: 1;
+            background: rgba(255,255,255,0.52);
+            backdrop-filter: blur(14px) saturate(160%);
+            -webkit-backdrop-filter: blur(14px) saturate(160%);
+            border: 1px solid rgba(255,255,255,0.72);
+            border-radius: 50px;
+            box-shadow: 0 4px 18px rgba(26,127,255,0.10);
+            padding: 0 20px;
+            height: 48px;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        .header-center { flex: 1; text-align: center; }
+        .header-title {
+            font-size: 17px; font-weight: 900;
+            background: linear-gradient(135deg, #1a7fff, #0057d9);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; letter-spacing: -0.3px; display: block; 
+            line-height: 1.35; /* Tăng nhẹ để không bao giờ bị cắt mất dấu ngã chữ NGUYỄN */
+            padding-top: 3px;  /* Đệm thêm khoảng trống an toàn cho dấu Ễ */
+        }
+        .header-subtitle { 
+            font-size: 11px; font-weight: 600; color: var(--text-sub); display: block; 
+            margin-top: -1px; line-height: 1.2; 
+        }
+
+        /* HỆ THỐNG HỘP TRƯỢT CHỐNG LEM CHỮ GIỮA CÁC TẦNG */
+        .header-scroll-wrap {
+            overflow: hidden !important; /* Chặn tuyệt đối đuôi chữ p và dấu nặng lọt qua tầng khác */
+            height: 44px; /* Đặt chiều cao 44px rộng rãi cho chữ nằm gọn gàng */
+            width: 100%;
+            position: relative;
+        }
+        .header-slide-box {
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateY(0);
+        }
+        /* Khi lướt lên: Đẩy khít khao đúng 44px để tầng 2 chiếm trọn tâm viên thuốc */
+        .header-slide-box.show-salary {
+            transform: translateY(-44px);
+        }
+        .header-node-original, 
+        .header-node-salary {
+            height: 44px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+        }
+        
+        /* Hình tròn kính mờ riêng cho nút đăng xuất */
+        .btn-logout {
+            background: rgba(255,255,255,0.52);
+            backdrop-filter: blur(14px) saturate(160%);
+            -webkit-backdrop-filter: blur(14px) saturate(160%);
+            border: 1px solid rgba(255,255,255,0.72);
+            box-shadow: 0 4px 18px rgba(26,127,255,0.10);
+            color: var(--red); border-radius: 50%; width: 42px; height: 42px;
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-logout:active { transform: scale(0.92); }
+
+                .footer-bar {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 480px; 
+            padding: 4px 0; /* Ép mỏng khoảng đệm dọc từ 12px xuống còn 6px cực kỳ gọn gàng */
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            color: var(--gray); 
+            font-size: 9px; /* Thu gọn cỡ chữ xuống 10px mỏng mảnh tinh tế */
+            text-align: center;
+            pointer-events: none; 
+            border-top: 1px solid rgba(255,255,255,0.35); /* Đường biên mờ mảnh mai chặn đỉnh */
+            z-index: 99; font-weight: 700;
+            letter-spacing: 0.3px; /* Giãn nhẹ khoảng cách chữ giúp dễ đọc khi size nhỏ */
+        }
+
+                /* ===== TABS NỔI BẬT LƯƠNG ===== */
+        .tab-menu {
+            display: flex; background: rgba(255,255,255,0.3);
+            border: 1px solid rgba(255,255,255,0.5); border-radius: 50px;
+            margin: 16px; padding: 4px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        }
+        .tab-btn {
+            flex: 1; padding: 10px 4px; text-align: center; color: var(--text-sub);
+            cursor: pointer; background: transparent; border: none;
+            font-size: 13px; font-weight: 800; font-family: 'Nunito', sans-serif;
+            transition: all 0.3s cubic-bezier(0.2,0.8,0.2,1); 
+            border-radius: 50px; /* Bo tròn kén cho các nút bấm bên trong */
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .tab-btn svg { flex-shrink: 0; }
+        .tab-btn .tab-text { display: inline-block; line-height: 1; }
+        .tab-btn.active {
+            background: rgba(255,255,255,0.75); color: var(--text);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); transform: scale(1.02);
+        }
+        /* Tab Lương màu Gradient đặc biệt hút tài lộc khi Active */
+        .tab-btn.active[onclick*="tab-luong"] {
+            background: linear-gradient(135deg, #1a7fff, #0057d9);
+            color: #fff !important; box-shadow: 0 4px 14px rgba(26,127,255,0.3);
+        }
+
+        .tab-content { display: none; padding: 0 16px; }
+        .tab-content.active { display: block; animation: slideTab 0.28s ease forwards; }
+        @keyframes slideTab { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+
+        /* ===== ĐỊNH DẠNG KHUNG KÍNH MỜ BO SÂU ===== */
+        .glass-card, .khu-vuc-thu, .khu-vuc-chi, .khu-vuc-ghichu {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(12px) saturate(140%);
+            -webkit-backdrop-filter: blur(12px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.65);
+            border-radius: var(--radius-xl); padding: 20px;
+            box-shadow: var(--glass-shadow); margin-bottom: 16px;
+        }
+
+        /* ===== THÀNH PHẦN INPUT ĐẸP ===== */
+        .form-group { margin-bottom: 14px; }
+        label { display: block; margin-bottom: 6px; font-weight: 800; color: var(--text-sub); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding-left: 4px; }
+        
+        input[type="text"], input[type="date"], input[type="number"], select, textarea {
+            width: 100%; padding: 14px 16px; border: 1px solid rgba(255,255,255,0.7);
+            border-radius: var(--radius-sm); font-size: 15px; font-family: 'Nunito', sans-serif;
+            background: rgba(255,255,255,0.5); color: var(--text); transition: all 0.25s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--blue); background: rgba(255,255,255,0.85); box-shadow: 0 0 0 3px rgba(26,127,255,0.1);
+        }
+
+        /* Input/Select trong filter-bar và ot-input-row — bo 50px pill, chiều cao khớp btn */
+        .filter-bar-row input[type="date"],
+        .filter-bar-row input[type="text"],
+        .ot-input-row input[type="date"],
+        .ot-input-row select {
+            border-radius: 50px;
+            padding: 11px 16px;
+            height: 44px;
+            font-size: 14px;
+        }
+                /* Input trong form-group bo 50px pill đồng bộ giao diện */
+        .form-group input[type="date"],
+        .form-group input[type="text"],
+        .form-group input[type="number"] {
+            border-radius: 50px;
+            padding: 13px 16px;
+        }
+        
+        /* Hạ thấp chiều cao ô chọn Danh mục Thu-Chi về đúng 44px tiêu chuẩn */
+        .form-group select {
+            border-radius: 50px !important;
+            height: 44px !important; /* Khóa cứng chiều cao bằng các ô khác trong app */
+            padding: 0 16px !important; /* Triệt tiêu padding dọc để chữ căn giữa chuẩn xác */
+        }
+        
+        /* Đồng bộ chiều cao và bo nhộng kén cho các nút bấm phụ trợ đi kèm */
+        .inline-row .btn-glass {
+            height: 44px !important; /* Cao bằng khít ô chọn bên cạnh */
+            border-radius: 50px !important; /* Bo tròn sâu viên thuốc cực sang */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 16px;
+            margin: 0;
+        }
+        /* Textarea ghi chú bo tròn sâu đồng bộ */
+        .form-group textarea {
+            border-radius: 24px;
+            padding: 14px 16px;
+        }
+
+        /* ===== NÚT BẤM BO TRÒN SÂU CHUẨN SANG ===== */
+        .btn-save, .btn-save-ot, .btn-sm-blue, .btn-save-cn-flat {
+            width: 100%; padding: 15px; border: none;
+            background: linear-gradient(135deg, #1a7fff, #0057d9);
+            color: white; border-radius: 50px; /* Bo viên tròn sâu nhộng kén */
+            font-size: 15px; font-weight: 800; font-family: 'Nunito', sans-serif;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 16px rgba(26,127,255,0.25);
+            transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .btn-save:active, .btn-save-ot:active, .btn-sm-blue:active, .btn-save-cn-flat:active { transform: scale(0.96); box-shadow: none; }
+
+        .btn-glass {
+            background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.7);
+            border-radius: 20px; padding: 10px 16px; font-size: 13px; font-weight: 800;
+            color: var(--blue); cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        .btn-delete-small {
+            background: rgba(255,59,92,0.08); border: 1px solid rgba(255,59,92,0.15);
+            color: var(--red); border-radius: 10px; padding: 5px 10px; font-size: 11px; font-weight: 800; cursor: pointer;
+        }
+
+                /* ===== KHUNG CÀI ĐẶT LƯƠNG CHUẨN KÍNH MỜ GEMINI ===== */
+        .settings-details {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.65);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--glass-shadow);
+            overflow: hidden; margin-bottom: 12px;
+        }
+        .settings-summary {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 16px; cursor: pointer; list-style: none; font-size: 14px; font-weight: 800; color: #1a2a3a;
+        }
+        .settings-summary::-webkit-details-marker { display: none; }
+        .settings-summary-left { display: flex; align-items: center; gap: 8px; }
+        .settings-summary-arrow { font-size: 18px; color: #aac0d8; transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .settings-details[open] .settings-summary-arrow { transform: rotate(90deg); }
+        .settings-body { border-top: 1px solid rgba(255,255,255,0.4); padding-bottom: 2px; }
+        
+        /* Cấu hình hàng ngang căn giữa tuyệt đối */
+        .settings-row { 
+            display: flex; 
+            align-items: center; 
+            padding: 10px 16px; 
+            border-bottom: 1px solid rgba(255,255,255,0.3); 
+        }
+        .settings-row:last-child { border-bottom: none; }
+        
+        /* Icon nét mảnh gọn gàng bên trái */
+        .settings-row-icon { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            width: 18px; 
+            height: 18px; 
+            color: #5a7a9a; 
+            flex-shrink: 0; 
+            margin-right: 6px; /* Khoảng cách vừa vặn giữa icon và chữ */
+        }
+        
+        /* Chữ LCB/PC chiếm trọn phần còn lại của 50% bên trái */
+        .settings-row-label {
+            flex: 1; font-size: 13px; font-weight: 700; color: #1a2a3a; margin-bottom: 0;
+            display: flex; align-items: center; height: 100%;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        
+        /* Ô nhập tiền chiếm chính xác 50% nửa khung bên phải */
+        .settings-row-input {
+            flex: 0 0 50%; 
+            width: 50%; 
+            padding: 6px 10px; 
+            border: 1.5px solid transparent;
+            border-radius: 10px; font-size: 14px; font-weight: 800; height: 34px;
+            color: #1a7fff; background: transparent; text-align: right; box-sizing: border-box;
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        
+        /* Hiện khung viền nổi lên khi được chạm vào kích hoạt chỉnh sửa */
+        .settings-row-input:focus {
+            border-color: #1a7fff; background: rgba(255,255,255,0.8); 
+            outline: none; cursor: text;
+        }
+        
+                /* Đồng bộ nút lưu cài đặt và lưu tăng ca nhỏ gọn, nhộng kén chống tràn khung */
+        .btn-save-ot {
+            width: calc(100% - 32px) !important; 
+            margin: 12px 16px !important; 
+            padding: 10px 16px !important; 
+            height: 38px !important; 
+            border-radius: 50px !important;
+            background: linear-gradient(135deg, #1a7fff, #0057d9) !important;
+            color: #fff !important; border: none !important;
+            font-size: 14px !important; font-weight: 800; font-family: 'Nunito', sans-serif;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 14px rgba(26,127,255,0.25);
+            transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .btn-save-ot:active { transform: scale(0.95) !important; box-shadow: none !important; }
+
+                                /* ===== THÁNG OT BANNER CHUẨN KÍNH MỜ GEMINI ===== */
+        .ot-month-header {
+            background: rgba(210, 233, 255, 0.52) !important;
+            backdrop-filter: blur(20px) saturate(160%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+            border: 1px solid rgba(26, 127, 255, 0.25) !important;
+            
+            /* Ép cứng độ cong 28px chuẩn đồng bộ với khung cài đặt lương */
+            border-radius: 28px !important; 
+            overflow: hidden !important; /* Chặn hoàn toàn không cho nền tràn góc */
+            
+            box-shadow: 0 8px 24px rgba(26,127,255,0.05) !important;
+            padding: 12px 16px; margin-bottom: 12px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 10px;
+        }
+
+
+        /* ===== THÁNG OT BANNER CHUẨN GEMINI ===== */
+        .ot-month-header {
+            background: #fff; border-radius: 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(26,127,255,0.04);
+            padding: 12px 16px; margin-bottom: 12px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 10px; border: 1px solid #e8eef8;
+        }
+        .ot-month-info { font-size: 14px; font-weight: 800; color: #1a2a3a; display: flex; align-items: center; gap: 8px; }
+        .btn-xem-ot {
+            background: rgba(26,127,255,0.08); border: 1px solid rgba(26,127,255,0.15);
+            color: var(--blue); border-radius: 20px; padding: 6px 16px;
+            font-size: 13px; font-weight: 800; font-family: 'Nunito', sans-serif; cursor: pointer;
+        }
+
+        /* ===== PHIẾU LƯƠNG FLAT SANG TRỌNG ===== */
+        .result-box {
+            background: rgba(255,255,255,0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.7); border-radius: var(--radius-xl);
+            margin-top: 16px; box-shadow: var(--glass-shadow); overflow: hidden;
+        }
+                        /* Phần tóm tắt lương – cấu hình nút summary thu mở ẩn danh sách */
+        summary.rb-header-summary::-webkit-details-marker { display: none; }
+        summary.rb-header-summary { list-style: none; outline: none; cursor: pointer; }
+        
+        /* Header card xanh có hiệu ứng ánh sáng bồng bềnh sang trọng */
+                /* Header card xanh nâng cấp hiệu ứng luồng sáng quét sang trọng */
+        .rb-header {
+            background: linear-gradient(135deg, #1a7fff 0%, #005ce6 50%, #0047b3 100%);
+            padding: 16px 14px 18px 14px;
+            display: flex; flex-direction: column; gap: 4px;
+            align-items: center; text-align: center; position: relative;
+            box-shadow: inset 0 2px 12px rgba(255,255,255,0.2);
+            overflow: hidden; /* Giữ tia sáng nằm gọn trong các góc bo tròn */
+        }
+        
+        /* Tạo tia sáng quét chéo bồng bềnh lặp lại mỗi 6 giây */
+        .rb-header::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -150%;
+            width: 60%; height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg); /* Nghiêng tia sáng tạo độ vát tự nhiên */
+            animation: tuTrinhShimmer 6s infinite ease-in-out;
+        }
+        
+        @keyframes tuTrinhShimmer {
+            0% { left: -150%; }
+            25% { left: 150%; } /* Quét qua trong 1.5 giây đầu */
+            100% { left: 150%; } /* Nghỉ ngơi giữ nhịp ở các giây còn lại để tránh rối mắt */
+        }
+        
+                /* Cấu trúc hàng 1: Tiêu đề được căn giữa tuyệt đối, Mũi tên neo bên phải */
+        .rb-header-top {
+            display: flex; justify-content: center; align-items: center; 
+            width: 100%; padding-bottom: 2px; position: relative;
+        }
+        .rb-header-label { 
+            font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.9); 
+            letter-spacing: 0.5px; text-transform: uppercase; 
+            display: flex; align-items: center; gap: 6px; 
+        }
+        
+        /* Mũi tên được neo chặt vào lề phải để không đẩy lệch chữ ở giữa */
+        .rb-header-arrow {
+            font-size: 22px; color: rgba(255,255,255,0.7); 
+            transition: transform 0.3s ease; line-height: 1;
+            position: absolute; right: 0; 
+        }
+        .result-box[open] .rb-header-arrow { transform: rotate(90deg); }
+
+                /* Tiền tổng và chữ nhỏ */
+        .rb-header-amount { font-size: 34px; font-weight: 900; color: #fff; letter-spacing: -1px; margin: 0; line-height: 1.1; }
+        
+        /* Giảm margin-bottom để kéo các ô chip xích lên trên */
+        .rb-header-sub { font-size: 11px; color: rgba(255,255,255,0.7); font-weight: 600; margin-bottom: 3px; }
+
+        /* Khung 4 chip: Ép nằm trên 1 hàng duy nhất (nowrap) và giảm khoảng cách trên */
+        .rb-chips { 
+            display: flex; flex-wrap: nowrap; justify-content: space-between; 
+            gap: 4px; width: 100%; margin-top: 2px; 
+        }
+        
+                /* Thẻ chip viên thuốc - ĐÃ HẠ THẤP CHIỀU CAO ÔM SÁT VỪA KHÍT CHỮ */
+        .rb-chip {
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 24px; 
+            padding: 2px 2px; /* Giảm padding dọc từ 6px xuống 4px để thu nhỏ chiều cao */
+            display: flex; flex-direction: column; align-items: center; 
+            gap: 1px; /* Thu hẹp khoảng cách giữa chữ trên và số dưới từ 3px về 1px */
+            flex: 1; min-width: 0; white-space: nowrap; overflow: hidden;
+        }
+        
+        /* ÉP ẨN HOÀN TOÀN MÀN HÌNH CHÍNH LÚC TẢI TRANG ĐỂ TRIỆT TIÊU LỖI CHỚP NHÁY TIÊU ĐỀ */
+        #main-app {
+            display: none;
+        }
+        .rb-chip span { font-size: 8px; font-weight: 800; color: rgba(255,255,255,0.8); text-transform: uppercase; }
+        .rb-chip strong { font-size: 10px; font-weight: 900; color: #fff; letter-spacing: -0.2px; }
+        
+        .rb-chip.deduct { background: rgba(255,80,100,0.25); border-color: rgba(255,120,140,0.3); }
+        .rb-chip.plus { background: rgba(80,220,140,0.25); border-color: rgba(80,220,140,0.35); }
+
+
+        .rb-body { padding: 8px 0; }
+        .rb-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 20px; border-bottom: 1px solid rgba(0,0,0,0.03); }
+        .rb-row:last-child { border-bottom: none; }
+        .rb-row-label { font-size: 13px; color: var(--text-sub); font-weight: 700; display: flex; align-items: center; gap: 6px; }
+        .rb-row-val { font-size: 13px; font-weight: 800; color: var(--text); }
+        .rb-row-val.minus { color: var(--red); }
+        .rb-row-val.plus { color: var(--green); }
+        .rb-row-val.blue { color: var(--blue); }
+        .rb-row-val.orange { color: var(--orange); }
+        .rb-divider { margin: 4px 16px; border: none; border-top: 1px solid rgba(0,0,0,0.04); }
+        .rb-section-title { padding: 10px 20px 2px 20px; font-size: 11px; font-weight: 800; color: #aac0d8; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Controls mini bên trong phiếu lương */
+        .rb-ctrl-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(255,255,255,0.4); border-radius: var(--radius-sm); margin: 6px 12px; gap: 8px; border: 1px solid rgba(255,255,255,0.5); }
+        .rb-ctrl-label { font-size: 13px; font-weight: 800; color: var(--text); }
+        .rb-ctrl-label small { display: block; font-size: 10px; color: var(--text-sub); font-weight: 600; }
+        .rb-counter-wrap { display: flex; align-items: center; gap: 6px; }
+        .rb-counter-btn { width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .rb-counter-btn.blue { background: rgba(26,127,255,0.1); color: #1a7fff; }
+        .rb-counter-btn.orange { background: rgba(255,159,10,0.12); color: #ff9f0a; }
+        .rb-counter-input { width: 44px; text-align: center; border: 1px solid rgba(0,0,0,0.08); border-radius: 6px; font-weight: 800; font-size: 14px; height: 28px; background: #fff; }
+        .rb-save-mini { background: #1a7fff; color: #fff; border: none; border-radius: 6px; padding: 0 10px; font-size: 11px; font-weight: 800; height: 28px; cursor: pointer; }
+        .rb-save-mini.orange { background: #ff9f0a; }
+
+        /* Tăng ca chủ nhật */
+        .rb-cn-block { margin: 8px 12px; background: rgba(255,248,238,0.4); border: 1px solid rgba(255,159,10,0.2); border-radius: var(--radius-sm); overflow: hidden; }
+        .rb-cn-header { background: rgba(255,159,10,0.08); padding: 9px 16px; font-size: 11px; font-weight: 900; color: #e08500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .rb-cn-row { display: flex; align-items: center; gap: 8px; padding: 7px 14px; }
+        .rb-cn-input { width: 44px; text-align: center; height: 28px; border: 1px solid rgba(255,159,10,0.25); border-radius: 6px; font-weight: 800; color: #e08500; }
+        .rb-cn-label { font-size: 12px; font-weight: 800; color: #e08500; }
+        .rb-cn-unit { font-size: 12px; color: var(--text-sub); font-weight: 600; }
+        .rb-cn-money { font-size: 12px; font-weight: 800; color: #e08500; margin-left: auto; }
+        .rb-cn-total { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(255,159,10,0.05); border-top: 1px solid rgba(255,159,10,0.1); }
+        .rb-cn-total-label { font-size: 12px; font-weight: 800; color: #e08500; }
+        .rb-cn-total-val { font-size: 14px; font-weight: 900; color: #e08500; }
+        
+        /* Thực lãnh footer */
+        .rb-total-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: rgba(26,127,255,0.05); border-top: 1px solid rgba(26,127,255,0.1); }
+        .rb-total-label { font-size: 13px; font-weight: 900; color: #1a7fff; text-transform: uppercase; }
+        .rb-total-val { font-size: 22px; font-weight: 900; color: #1a7fff; }
+
+        /* ===== LỊCH SỬ DANH SÁCH - BO TRÒN ĐỒNG BỘ ===== */
+        .section-title { margin-top: 24px; margin-bottom: 12px; font-size: 17px; font-weight: 900; display: flex; align-items: center; gap: 8px; }
+        .section-title .stitle-icon { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: rgba(26,127,255,0.1); border-radius: 10px; color: var(--blue); flex-shrink: 0; }
+        
+        /* Bọc history-list trong 1 khung kính mờ bo tròn */
+        .history-wrap {
+            background: rgba(255,255,255,0.45);
+            backdrop-filter: blur(12px) saturate(140%);
+            -webkit-backdrop-filter: blur(12px) saturate(140%);
+            border: 1px solid rgba(255,255,255,0.65);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--glass-shadow);
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        .history-list { list-style: none; padding: 0; margin: 0; }
+        .history-list li {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            padding: 14px 18px; 
+            display: flex; justify-content: space-between; align-items: center; font-size: 14px;
+        }
+        .history-list li:last-child { border-bottom: none; }
+        .ngay-hien-thi { font-weight: 800; font-size: 13px; color: var(--blue); }
+
+        /* ===== TỔNG HUI - LỚN ĐẸP ===== */
+        .hui-total-box {
+            background: linear-gradient(135deg, #1a7fff 0%, #005ce6 60%, #0047b3 100%);
+            border-radius: var(--radius-xl);
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 8px 24px rgba(26,127,255,0.25);
+            position: relative; overflow: hidden;
+        }
+        .hui-total-box::before {
+            content: ''; position: absolute; top: -30px; right: -20px;
+            width: 120px; height: 120px;
+            background: rgba(255,255,255,0.08); border-radius: 50%;
+        }
+        .hui-total-label { font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+        .hui-total-amount { font-size: 30px; font-weight: 900; color: #fff; letter-spacing: -1px; line-height: 1; }
+        .hui-total-icon { opacity: 0.25; flex-shrink: 0; }
+
+        /* ===== CÁC THÀNH PHẦN KHÁC VẪN ĐẢM BẢO CHẠY TỐT ===== */
+        .app-logo { width: 120px; height: 120px; object-fit: contain; margin-bottom: 16px; border-radius: 24px; box-shadow: 0 8px 32px rgba(26,127,255,0.15); }
+        #login-screen { padding: 60px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; }
+        .btn-google { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 280px; padding: 15px; background: #fff; border: 1px solid #e8eef8; border-radius: 40px; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .search-box { display: flex; gap: 8px; margin-top: 10px; }
+        .search-box input { flex: 1; }
+        .search-box button { background: #fff; border: 1px solid rgba(0,0,0,0.08); padding: 10px 14px; border-radius: var(--radius-sm); font-weight: 700; font-size: 13px; cursor: pointer; }
+        .pagination { display: flex; justify-content: center; gap: 6px; margin-top: 16px; }
+        .page-btn { padding: 8px 14px; border: 1px solid rgba(0,0,0,0.06); background: rgba(255,255,255,0.6); border-radius: 50px; font-weight: 800; font-size: 13px; cursor: pointer; backdrop-filter: blur(10px); }
+        .page-btn.active { background: var(--blue); color: #fff; border-color: transparent; }
+        .note-preview { color: var(--text-sub); font-size: 13px; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .note-date { font-size: 11px; color: #aac0d8; margin-top: 6px; font-weight: 600; }
+        /* ===== MODAL ANIMATION ===== */
+        #custom-modal-overlay { 
+            position: fixed; top:0; left:0; width:100%; height:100%; 
+            background: rgba(15,35,65,0.2); 
+            display: flex; justify-content: center; align-items: center; 
+            z-index: 9999; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); 
+            transition: opacity 0.22s ease, visibility 0.22s ease; 
+            opacity: 0; visibility: hidden;
+        }
+        #custom-modal-overlay.show { opacity: 1; visibility: visible; }
+        #custom-modal { 
+            background: rgba(255,255,255,0.92); width: 85%; max-width: 320px; 
+            border-radius: 28px; overflow: hidden; 
+            box-shadow: 0 24px 60px rgba(0,0,0,0.12); border: 1px solid rgba(255,255,255,0.9);
+            transform: scale(0.88) translateY(20px);
+            transition: transform 0.32s cubic-bezier(0.34,1.56,0.64,1), opacity 0.28s ease;
+            opacity: 0;
+        }
+        #custom-modal-overlay.show #custom-modal { transform: scale(1) translateY(0); opacity: 1; }
+
+                        /* ===== DETAILS ANIMATION — ĐỘNG CƠ CO GIÃN ĐỘC LẬP CHỐNG KHỰNG ===== */
+    .settings-body,
+    .glass-card-body,
+    .result-box .rb-body {
+        overflow: hidden;
+        /* Áp dụng đường cong chuyển động tiêu chuẩn quốc tế ease-in-out giúp tăng tốc và giảm tốc êm ái */
+        transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                    opacity 0.25s ease-in-out;
+    }
+    
+    /* Trạng thái đóng: Ẩn tuyệt đối nhẹ nhàng */
+    .settings-body.anim-closed,
+    .glass-card-body.anim-closed,
+    .result-box .rb-body.anim-closed {
+        max-height: 0;
+        opacity: 0;
+    }
+    
+    /* Trạng thái mở: Hiện rõ ràng phẳng phiêu */
+    .settings-body.anim-open,
+    .glass-card-body.anim-open,
+    .result-box .rb-body.anim-open {
+        opacity: 1;
+    }
+        .result-box .rb-body {
+            overflow: hidden;
+            transition: max-height 0.38s cubic-bezier(0.2,0.8,0.2,1), opacity 0.3s ease;
+        }
+        .result-box .rb-body.anim-closed { max-height: 0 !important; opacity: 0; }
+        .result-box .rb-body.anim-open { opacity: 1; }
+
+        /* ===== FILTER SEARCH BOX BO TRÒN ===== */
+        .filter-bar {
+            background: rgba(255,255,255,0.45);
+            backdrop-filter: blur(12px) saturate(140%);
+            -webkit-backdrop-filter: blur(12px) saturate(140%);
+            border: 1px solid rgba(255,255,255,0.65);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--glass-shadow);
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .filter-bar-row {
+            display: flex; gap: 8px; align-items: center;
+        }
+        .filter-bar-row input { flex: 1; margin: 0; }
+        .btn-filter-clear {
+            background: rgba(255,59,92,0.07); 
+            border: 1px solid rgba(255,59,92,0.18);
+            color: var(--red); border-radius: 50px; 
+            padding: 10px 16px; font-size: 13px; font-weight: 800; 
+            cursor: pointer; white-space: nowrap; font-family: 'Nunito', sans-serif;
+            display: flex; align-items: center; gap: 5px;
+            transition: all 0.2s;
+        }
+        .btn-filter-clear:active { transform: scale(0.95); }
+
+        /* ===== KHUNG XOÁ & XEM THÁNG CŨ ĐỒNG BỘ ===== */
+        .glass-card-details {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(12px) saturate(140%);
+            -webkit-backdrop-filter: blur(12px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.65);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--glass-shadow);
+            overflow: hidden; margin-bottom: 12px;
+        }
+        .glass-card-summary {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 16px; cursor: pointer; list-style: none; 
+            font-size: 14px; font-weight: 800; color: #1a2a3a;
+        }
+        .glass-card-summary::-webkit-details-marker { display: none; }
+        .glass-card-summary-left { display: flex; align-items: center; gap: 8px; }
+        .glass-card-summary-arrow { font-size: 18px; color: #aac0d8; transition: transform 0.3s; }
+        .glass-card-details[open] .glass-card-summary-arrow { transform: rotate(90deg); }
+        .glass-card-body { 
+            border-top: 1px solid rgba(255,255,255,0.4); 
+            padding: 14px 16px 16px 16px;
+        }
+        #custom-modal-title { padding: 20px 20px 6px 20px; font-size: 17px; font-weight: 900; text-align: center; }
+        #custom-modal-body { padding: 6px 20px 20px 20px; text-align: center; font-size: 14px; color: var(--text-sub); }
+        #custom-modal-buttons { display: flex; border-top: 1px solid rgba(0,0,0,0.05); }
+        #custom-modal-buttons button { flex:1; padding:15px; border:none; background:transparent; font-size:15px; cursor:pointer; font-family:'Nunito',sans-serif; }
+        #custom-modal-btn-cancel { color: var(--red); font-weight: 600; border-right: 1px solid rgba(0,0,0,0.05); }
+        #custom-modal-btn-ok { color: var(--blue); font-weight: 800; }
+        .nhac-nho-hui { background: rgba(255,59,92,0.08); border: 1px solid rgba(255,59,92,0.15); color: var(--red); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 12px; font-weight: 700; text-align: center; display: none; }
+        .inline-row { display: flex; gap: 6px; align-items: center; }
+        .ot-quick-row { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; margin-top: 10px; border-top: 1px dashed rgba(0,0,0,0.05); }
+        .ot-month-badge { display: none; }
+        .ot-input-card { background: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.6); border-radius: var(--radius-xl); padding: 4px 0; box-shadow: var(--glass-shadow); margin-bottom: 16px; overflow: hidden; }
+        .ot-input-header { padding: 12px 16px 0 16px; font-size: 11px; font-weight: 800; color: #aac0d8; text-transform: uppercase; letter-spacing: 0.5px; }
+        .ot-input-row { display: flex; gap: 8px; align-items: center; padding: 8px 16px; }
+        .delete-month-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+        .thu-nhap { color: var(--green) !important; font-weight: 800; }
+        .chi-phi { color: var(--red) !important; font-weight: 800; }
+        .highlight { font-weight: 800; font-size: 15px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.04); display: flex; justify-content: space-between; }
+        .highlight span:last-child { color: var(--blue); font-size: 18px; }
+        #dongCaDem { color: var(--orange) !important; }
+        .loader { border:3px solid rgba(26,127,255,0.1); border-top:3px solid var(--blue); border-radius:50%; width:24px; height:24px; animation:spin 0.8s linear infinite; display:none; margin:10px auto; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+                /* ===== HỆ THỐNG HEADER TRƯỢT ĐỘNG KHÔNG TRÀN CHỮ ===== */
+        .header-scroll-wrap {
+            overflow: hidden !important; /* Khóa chặt không cho chữ tầng 2 lộ ra lúc đầu */
+            height: 36px; /* Chiều cao cố định làm khung nhìn tiêu chuẩn */
+            width: 100%;
+            position: relative;
+        }
+        
+        .header-slide-box {
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1); /* Đường cong trượt siêu mượt */
+            transform: translateY(0);
+        }
+        
+        /* Khi nhận lệnh cuộn quá Card xanh: Đẩy chính xác 36px của tầng 1 lên để tầng 2 vào tâm */
+        .header-slide-box.show-salary {
+            transform: translateY(-36px);
+        }
+        
+        .header-node-original, 
+        .header-node-salary {
+            height: 36px; /* Ép bằng khít với khung nhìn để không lệch pha */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+        }
+ 
+                                        /*         /* ===== HỆ THỐNG TRỢ LÝ AI - PHIÊN BẢN SÁT ĐÁY MÀN HÌNH CHUẨN XỊN ===== */
+        .ai-chat-bubble {
+            position: fixed; 
+            bottom: 20px; /* Đã hạ sát sàn xuống góc dưới bên phải màn hình */
+            right: 20px;
+            width: 56px; height: 56px; border-radius: 50%;
+            background: linear-gradient(135deg, #1a7fff, #0057d9);
+            box-shadow: 0 8px 24px rgba(26,127,255,0.4);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; cursor: pointer;
+            overflow: visible; /* Cho phép robot và chữ thò đầu ra ngoài vòng tròn */
+            animation: aiMascotFloat 3s infinite ease-in-out;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .ai-chat-bubble:active { transform: scale(0.9) !important; }
+        
+        @keyframes aiMascotFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Định vị các tầng lớp bên trong bong bóng */
+        .icon-chat-static, .icon-close-chat, .icon-robot-chibi, .ai-welcome-bubble {
+            position: absolute;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .icon-chat-static { color: white; transform: scale(1); opacity: 1; }
+        .icon-close-chat { color: white; transform: scale(0) rotate(-90deg); opacity: 0; }
+        .icon-robot-chibi { transform-origin: center bottom; transform: scale(0); opacity: 0; overflow: visible; bottom: 6px; }
+
+        /* 🔄 VÒNG LẶP 6 GIÂY: ROBOT TỰ THÒ LÊN VẪY TAY CHÀO RỒI THỤT XUỐNG THOẮT ẨN THOẮT HIỆN */
+        .ai-chat-bubble:not(.active-chat) .icon-chat-static { animation: staticIconLoop 6s infinite ease-in-out; }
+        .ai-chat-bubble:not(.active-chat) .icon-robot-chibi { animation: robotPopLoop 6s infinite ease-in-out; }
+        .ai-chat-bubble:not(.active-chat) .ai-welcome-bubble { animation: textPopLoop 6s infinite ease-in-out; }
+
+        /* Khớp vai xoay lắc tay vẫy chào Tú Trinh */
+        .icon-robot-chibi .ai-waving-arm {
+            transform-origin: 36px 25px;
+            animation: aiHandWave 2s infinite ease-in-out;
+        }
+        @keyframes staticIconLoop {
+            0%, 25%, 85%, 100% { transform: scale(1); opacity: 1; }
+            35%, 75% { transform: scale(0); opacity: 0; }
+        }
+        @keyframes robotPopLoop {
+            0%, 25%, 85%, 100% { transform: scale(0) translateY(15px); opacity: 0; }
+            35% { transform: scale(1.25) translateY(-10px); opacity: 1; }
+            40%, 75% { transform: scale(1.1) translateY(-6px); opacity: 1; }
+        }
+        @keyframes textPopLoop {
+            0%, 28%, 83%, 100% { transform: scale(0); opacity: 0; }
+            38%, 75% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes aiHandWave {
+            0%, 30%, 100% { transform: rotate(0deg); }
+            45%, 65% { transform: rotate(-45deg); }
+            55%, 75% { transform: rotate(-15deg); }
+        }
+
+        /* 🎭 TRẠNG THÁI HOÁN ĐỔI: Khi mở khung chat, quả bóng chuyển đỏ ruby và hiện nút Đóng (X) */
+        .ai-chat-bubble.active-chat { background: linear-gradient(135deg, #ff3b5c, #c92040); box-shadow: 0 8px 24px rgba(255,59,92,0.3); }
+        .ai-chat-bubble.active-chat .icon-chat-static { transform: scale(0); opacity: 0; animation: none; }
+        .ai-chat-bubble.active-chat .icon-robot-chibi { transform: scale(0); opacity: 0; animation: none; }
+        .ai-chat-bubble.active-chat .ai-welcome-bubble { transform: scale(0); opacity: 0; animation: none; }
+        .ai-chat-bubble.active-chat .icon-close-chat { transform: scale(1) rotate(90deg); opacity: 1; }
+
+        /* Lời thoại bong bóng nhộng kén */
+        .ai-welcome-bubble {
+            bottom: 68px; right: -12px; background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(26,127,255,0.25); padding: 5px 11px; border-radius: 14px;
+            font-size: 10px; font-weight: 900; color: #0057d9; white-space: nowrap;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08); letter-spacing: 0.2px; pointer-events: none;
+        }
+        .ai-welcome-bubble::after {
+            content: ''; position: absolute; bottom: -5px; right: 32px;
+            width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent;
+            border-top: 5px solid rgba(255, 255, 255, 0.96);
+        }
+
+        /* 📉 KHUNG CỬA SỔ CHAT CAO RỘNG RÃI ĐÃ ĐƯỢC ĐỒNG BỘ HẠ THEO ICON */
+        .ai-chat-window {
+            position: fixed; 
+            bottom: 90px; /* Hạ thấp xuống bám đuôi ngay trên đầu robot (20px đáy + 56px thân robot + 14px khoảng cách an toàn) */
+            right: 20px;
+            width: calc(100% - 40px); max-width: 350px; 
+            height: 420px; /* Giữ nguyên không gian cao rộng thoải mái 420px như bạn thích */
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 24px; z-index: 9998;
+            box-shadow: 0 12px 36px rgba(0,0,0,0.15);
+            display: flex; flex-direction: column; overflow: hidden;
+            transform: translateY(15px) scale(0.95); opacity: 0; pointer-events: none;
+            transition: all 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .ai-chat-window.show { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
+        .ai-chat-header { padding: 14px 16px; background: linear-gradient(135deg, rgba(26,127,255,0.08), rgba(0,87,217,0.08)); border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .ai-chat-messages { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .ai-msg { max-width: 80%; padding: 10px 14px; border-radius: 16px; font-size: 13px; line-height: 1.4; word-break: break-word; }
+        .ai-msg.user { background: linear-gradient(135deg, #1a7fff, #0057d9); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .ai-msg.bot { background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.06); color: #2c3e50; align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+        .ai-chat-footer { padding: 10px; display: flex; align-items: center; gap: 8px; border-top: 1px solid rgba(0,0,0,0.05); background: white; }
+        .ai-chat-input { flex: 1; border: 1px solid #e2e8f0; padding: 10px 14px; border-radius: 30px; font-size: 13px; outline: none; transition: border 0.2s; }
+        .ai-chat-input:focus { border-color: #1a7fff; }
+        .ai-chat-btn { background: #1a7fff; color: white; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(52, 199, 89, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 199, 89, 0); } }
+
+                                /* ===== TABS NỔI BẬT LƯƠNG - PHONG TỎA TUYỆT ĐỐI ÉP ĐỨNG IM PHĂNG PHẮC ===== */
+        .tab-menu {
+            position: fixed !important;
+            top: 66px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 32px);
+            max-width: 448px;
+            margin: 0 !important;
+            z-index: 9999 !important;
+            display: flex; 
+            background: rgba(255, 255, 255, 0.92) !important;
+            border: 1px solid rgba(255, 255, 255, 0.6); 
+            border-radius: 50px;
+            padding: 4px; 
+            backdrop-filter: blur(14px) saturate(160%);
+            -webkit-backdrop-filter: blur(14px) saturate(160%);
+            box-sizing: border-box;
+            box-shadow: 0 8px 24px rgba(26,127,255,0.06);
+            will-change: transform;
+        }
+
+        /* MÀNG ĐỆM AN TOÀN: Đẩy nội dung các Tab xuống dưới để không bị thanh menu cố định che khuất */
+        .tab-content {
+            margin-top: 50px !important; /* Tạo một khoảng trống đẩy nội dung xuống dưới lườn tab fixed */
+        }
+
+
+        /* ===== BONG BÓNG THOẠI AI NGỮ CẢNH DI ĐỘNG CHỐNG DỒN CỤC CHỮ ===== */
+        .ai-context-bubble {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(240,247,255,0.98));
+            border: 1px solid rgba(26,127,255,0.3);
+            padding: 7px 12px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 800;
+            color: #0057d9;
+            box-shadow: 0 8px 24px rgba(26,127,255,0.15);
+            z-index: 10000;
+            pointer-events: none; /* Trượt ngón tay xuyên qua thoải mái hông lo cản trở gõ phím */
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: normal;
+            width: max-content;
+            max-width: 230px; /* Định mức bề rộng tối đa chuẩn vừa vặn màn hình di động */
+            line-height: 1.3;
+            opacity: 0;
+            transform: translateY(5px) scale(0.9);
+            transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .ai-context-bubble.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        /* Cái đuôi nhọn tự động chuyển biên trái/phải thông minh thông qua biến số của JavaScript */
+        .ai-context-bubble::after {
+            content: ''; position: absolute;
+            bottom: -5px; 
+            left: var(--arrow-left, 20px);
+            right: var(--arrow-right, auto);
+            width: 0; height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid rgba(26,127,255,0.3);
+        }
+                        
+                /* ===== LỚP PHỦ MỜ KÍNH LOCK TRANG NỀN KHI CHAT CHUẨN UX ===== */
+        body.ai-chat-open {
+            overflow: hidden !important; /* Khóa cứng toàn bộ trang nền không cho lướt */
+        }
+        
+        .ai-chat-backdrop {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.25); /* Tạo màng sương tối nhẹ che bớt số liệu */
+            backdrop-filter: blur(8px); /* Phủ hiệu ứng mờ kính Apple Intelligence */
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 100000 !important; /* Đẩy lên mức 100.000 để đè bẹp hoàn toàn mức 9999 của thanh Tab Menu */
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .ai-chat-backdrop.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* 👑 ĐÈ BẸP ĐA TẦNG: Ép cửa sổ chat và nút bong bóng nhảy lên tầng cao nhất */
+        .ai-chat-window {
+            z-index: 100001 !important; /* Đẩy cửa sổ chat lên mức 100.001 để nổi lên trên tấm màn mờ */
+        }
+        .ai-chat-bubble {
+            z-index: 100002 !important; /* Đẩy chú robot/nút đóng X lên mức 100.002 để luôn nằm trên cùng bộ ba */
+        }
+      
+        /* ===== BẢNG THÔNG BÁO CHÀO MƯỜNG KÍNH MỜ THEO GIỜ VIP ===== */
+        .welcome-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.4); 
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); /* Hiệu ứng làm mờ nhòe trang sau chuẩn Apple */
+            display: flex; align-items: center; justify-content: center;
+            z-index: 200005 !important; /* Đẩy nổi lên trên cùng tuyệt đối kể cả khung chat */
+            opacity: 0; pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .welcome-overlay.show { opacity: 1; pointer-events: auto; }
+        
+        .welcome-card {
+            background: rgba(255, 255, 255, 0.92);
+            width: calc(100% - 48px); max-width: 330px;
+            border-radius: 28px; padding: 26px 24px; text-align: center;
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.18);
+            transform: scale(0.85) translateY(20px);
+            transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Hiệu ứng nảy lò xo khi mở */
+            box-sizing: border-box;
+        }
+        .welcome-overlay.show .welcome-card { transform: scale(1) translateY(0); }
+        
+        .welcome-icon-wrap {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: linear-gradient(135deg, #ff9f0a, #ff4757);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px; color: white;
+            box-shadow: 0 8px 20px rgba(255,159,10,0.3);
+        }
+                .welcome-title { 
+            font-size: 15px; 
+            font-weight: 900; 
+            color: #1e293b; 
+            margin-bottom: 12px; 
+            letter-spacing: 0.3px;
+            /* 🚀 BỘ BA PHONG TỎA TUYỆT ĐỐI KHÔNG CHO XUỐNG HÀNG */
+            white-space: nowrap;       /* Ép chữ xếp hàng ngang, cấm nhảy xuống hàng thứ 2 */
+            overflow: hidden;          /* Giấu phần chữ bị thừa đi nếu tên quá dài */
+            text-overflow: ellipsis;   /* Tự động điền dấu 3 chấm (...) tinh tế ở cuối dòng */
+        }
+        .welcome-text { font-size: 13px; font-weight: 700; color: #475569; line-height: 1.5; margin-bottom: 22px; text-align: left; }
+        .welcome-btn {
+            width: 100%; background: linear-gradient(135deg, #1a7fff, #0057d9);
+            color: white; border: none; padding: 13px; border-radius: 50px;
+            font-weight: 800; font-size: 14px; cursor: pointer;
+            box-shadow: 0 6px 16px rgba(26,127,255,0.25); transition: transform 0.1s;
+        }
+        .welcome-btn:active { transform: scale(0.96); }
+                
+
+</style>
 </head>
 <body>
+<div class="app-container">
 
-    <header onclick="secretKnock()">
-        <h1>Multi Phục Pro P.128</h1>
-        <p id="weather-status">Hệ thống đang sẵn sàng...</p>
-    </header>
+    <!-- LOGIN -->
+    <div id="login-screen">
+        <img src="./logo.png" alt="Logo" class="app-logo" onerror="this.style.display='none'" onclick="xuLyGoLogo()">
+                <h1 style="background:linear-gradient(135deg,#1a7fff,#0057d9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:900;margin-bottom:2px;line-height:1.4;padding-top:4px;">TÚ TRINH NGUYỄN</h1>
+        <p id="login-msg" style="font-style:italic;margin-top:2px;">Quản Lý Tài Chính Một Lần Vuốt Chạm</p>
+        <div class="loader" id="login-loader"></div>
+        <button class="btn-google" id="btn-login-google" onclick="xuLyDangNhapGoogle()">
+            <svg width="22" height="22" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            Tiếp tục với Google
+        </button>
+        <p style="font-size:13px; color:var(--gray); margin-top:18px; max-width:280px; line-height:1.5; font-weight:600;">Đăng nhập để tự động lưu và đồng bộ dữ liệu trên đám mây ☁️</p>
+    </div>
 
-    <div class="container">
-        <div class="tabs glass-panel">
-            <button class="tab-btn active" onclick="switchTab('video')">Video</button>
-            <button class="tab-btn" onclick="switchTab('music')">Nhạc</button>
-            <button class="tab-btn" onclick="switchTab('tools')">Tiện ích</button>
-        </div>
-
-        <div id="video" class="section active">
-            <div id="video-container" class="media-grid"></div>
-        </div>
-
-        <div id="music" class="section">
-            <div id="music-container" class="media-grid"></div>
-        </div>
-
-        <div id="tools" class="section">
-            <div class="tools-grid">
-                <div class="tool-item glass-panel" id="install-card" style="display:none;" onclick="triggerInstall()">
-                    <span class="tool-icon">📲</span>
-                    <span class="tool-name">Cài đặt App</span>
-                </div>
-                <div class="tool-item glass-panel" onclick="fetchNCTMusic()">
-                    <span class="tool-icon">🎧</span>
-                    <span class="tool-name">NCT Trending</span>
-                </div>
-                <div class="tool-item glass-panel" onclick="fetchTikTokVideos()">
-                    <span class="tool-icon">📱</span>
-                    <span class="tool-name">TikTok Nổi Bật</span>
-                </div>
-                <div class="tool-item glass-panel" onclick="getAIAdvice()">
-                    <span class="tool-icon">🧠</span>
-                    <span class="tool-name">AI Trợ Lý</span>
+    <!-- MAIN APP -->
+    <div id="main-app">
+        <div class="header">
+                                    <div class="header-pill">
+                <div class="header-scroll-wrap">
+                    <div class="header-slide-box" id="headerSlideBox">
+                        
+                                                <div class="header-node-original">
+                            <span class="header-title">TÚ TRINH NGUYỄN</span>
+                            <span class="header-subtitle" id="loiChaoSubtitle">✨ Chào Tú Trinh xinh đẹp</span>
+                        </div>
+                        
+                        <div class="header-node-salary">
+                            <div style="font-size: 9px; color: var(--text-sub); font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; line-height: 1.1;">Tổng Tiền Lương Tháng Này</div>
+                            <div id="hienThucLanhHeader" style="font-size: 16px; font-weight: 900; background: linear-gradient(135deg, #1a7fff, #0057d9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1.2; font-family: 'SF Pro Display', sans-serif;">0 ₫</div>
+                        </div>
+                        
+                    </div>
                 </div>
             </div>
-            <div id="tool-output" class="glass-panel" style="display: none; margin-top: 20px;"></div>
+            <button class="btn-logout" onclick="dangXuatTaikhoan()" title="Đăng xuất">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+            </button>
         </div>
-    </div>
 
-    <div id="mini-player" class="glass-panel" style="display: none;">
-        <div class="mini-art" id="mini-icon">🎵</div>
-        <div class="mini-info">
-            <div class="mini-title" id="mini-title">Đang phát...</div>
-            <div class="mini-artist" id="mini-artist">Multi Phục Pro</div>
+                <div class="tab-menu">
+            <button class="tab-btn active" onclick="chuyenTab('tab-luong', this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                <span class="tab-text">Lương</span>
+            </button>
+            <button class="tab-btn" onclick="chuyenTab('tab-hui', this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"></path></svg>
+                <span class="tab-text">Hụi</span>
+            </button>
+            <button class="tab-btn" onclick="chuyenTab('tab-thuchi', this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                <span class="tab-text">Thu-Chi</span>
+            </button>
+            <button class="tab-btn" onclick="chuyenTab('tab-ghichu', this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                <span class="tab-text">Ghi chú</span>
+            </button>
         </div>
-        <div class="mini-controls">
-            <button class="mini-btn" id="pip-btn" onclick="togglePiP()">🖼️</button>
-            <button class="mini-btn" onclick="toggleMiniPlayer()" id="mini-pp-icon">⏸️</button>
-            <button class="mini-btn close-btn" onclick="closeMiniPlayer()">✖</button>
-        </div>
-    </div>
 
-    <div id="custom-alert" class="modal-overlay">
-        <div class="alert-box glass-panel">
-            <div class="alert-header">👑 Chào Sếp Phục Pro</div>
-            <div class="alert-body" id="alert-message">Nội dung thông báo</div>
-            <button class="alert-btn" onclick="closeAlert()">Đã Rõ</button>
-        </div>
-    </div>
+        <!-- TAB LƯƠNG -->
+        <div id="tab-luong" class="tab-content active">
 
-    <div id="admin-login-modal" class="modal-overlay">
-        <div class="modal-content glass-panel">
-            <h2>🔐 Admin Login</h2>
-            <input type="password" id="admin-pin" class="glass-input" placeholder="Nhập PIN..." inputmode="numeric">
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn btn-cancel" onclick="closeAdminLogin()">Hủy</button>
-                <button class="btn btn-primary" onclick="verifyAdmin()">Mở Khóa</button>
+            <!-- ── CÀI ĐẶT ── -->
+                                    <details class="settings-details">
+                <summary class="settings-summary">
+                    <span class="settings-summary-left">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a7a9a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        <span>Cài đặt lương & phụ cấp</span>
+                    </span>
+                    <span class="settings-summary-arrow">›</span>
+                </summary>
+                <div class="settings-body">
+                    <div class="settings-row">
+                        <span class="settings-row-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                        </span>
+                        <label class="settings-row-label">Lương Cơ Bản:</label>
+                        <input type="text" inputmode="numeric" id="luongCoBan" value="5.660.000"
+                            class="settings-row-input" oninput="dinhDangNhapLieu(this); tinhToanTrucTiep()">
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-row-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                        </span>
+                        <label class="settings-row-label">Tiền Phụ Cấp:</label>
+                        <input type="text" inputmode="numeric" id="phuCapInput" value="700.000"
+                            class="settings-row-input" oninput="dinhDangNhapLieu(this); tinhToanTrucTiep()">
+                    </div>
+                    
+                    <button class="btn-save-ot" onclick="luuCaiDatLuong()" style="margin-top: 16px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                        Lưu cài đặt
+                    </button>
+                </div>
+            </details>
+
+            <!-- ── BẢNG THỰC LÃNH THÁNG NÀY (dời lên dưới cài đặt lương) ── -->
+                                    <details class="result-box" open style="list-style: none; display: block; margin-top: 0; margin-bottom: 12px;">
+                <summary class="rb-header-summary">
+                    <div class="rb-header">
+                        
+                        <div class="rb-header-top">
+                            <div class="rb-header-label">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                <span>Thực lãnh tháng này</span>
+                            </div>
+                            <span class="rb-header-arrow">›</span>
+                        </div>
+
+                        <div class="rb-header-amount" id="hienThucLanh">0 ₫</div>
+                        <div class="rb-header-sub">Sau khấu trừ BHXH, BHYT, BHTN & công đoàn</div>
+                        
+                        <div class="rb-chips">
+                            <div class="rb-chip plus"><span>+ Phụ Cấp</span><strong id="chipPhuCap">0₫</strong></div>
+                            <div class="rb-chip plus"><span>+ Tăng Ca</span><strong id="chipOT">0₫</strong></div>
+                            <div class="rb-chip plus"><span>+ Chủ Nhật</span><strong id="chipCN">0₫</strong></div>
+                            <div class="rb-chip deduct"><span>- Khấu Trừ</span><strong id="chipBH">0₫</strong></div>
+                        </div>
+
+                    </div>
+                </summary>
+                
+                <div class="rb-body">
+                    <div class="rb-section-title">Lương & Khấu trừ</div>
+                    <div class="rb-row">
+                        <span class="rb-row-label">
+                            <span class="rb-icon" style="display:inline-flex; align-items:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></span>
+                            Lương cơ bản
+                        </span>
+                        <span class="rb-row-val" id="hienLCB">0 ₫</span>
+                    </div>
+                    <div class="rb-row">
+                        <span class="rb-row-label">
+                            <span class="rb-icon" style="display:inline-flex; align-items:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></span>
+                            Trừ BHXH (8%)
+                        </span>
+                        <span class="rb-row-val minus" id="hienBHXH">0 ₫</span>
+                    </div>
+                    <div class="rb-row">
+                        <span class="rb-row-label">
+                            <span class="rb-icon" style="display:inline-flex; align-items:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></span>
+                            Trừ BHYT (1.5%)
+                        </span>
+                        <span class="rb-row-val minus" id="hienBHYT">0 ₫</span>
+                    </div>
+                    <div class="rb-row">
+                        <span class="rb-row-label">
+                            <span class="rb-icon" style="display:inline-flex; align-items:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></span>
+                            Trừ BHTN (1%)
+                        </span>
+                        <span class="rb-row-val minus" id="hienBHTN">0 ₫</span>
+                    </div>
+                    <div class="rb-row">
+                        <span class="rb-row-label">
+                            <span class="rb-icon" style="display:inline-flex; align-items:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
+                            Trừ Công đoàn
+                        </span>
+                        <span class="rb-row-val minus">-25.500 ₫</span>
+                    </div>
+                    <div class="rb-row">
+                        <span class="rb-row-label">
+                            <span class="rb-icon" style="display:inline-flex; align-items:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l-7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></span>
+                            Phụ cấp cố định
+                        </span>
+                        <span class="rb-row-val plus" id="hienPhuCapKhac">0 ₫</span>
+                    </div>
+                </div>
+            </details>
+
+            <!-- ── BANNER THÁNG ── -->
+                        <div id="otMonthBanner" class="ot-month-header">
+                <div class="ot-month-info">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a2a3a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <span id="tenThangHienTai">Giờ tăng ca: tháng --/2026</span>
+                </div>
+                <button class="btn-xem-ot" onclick="hienThiChiTietOTBanner()">Xem</button>
+            </div>
+
+            <!-- ── NHẬP TĂNG CA ── -->
+                                    <details class="settings-details">
+                <summary class="settings-summary">
+                    <span class="settings-summary-left">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a7a9a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <span>Ghi tăng ca ngày thường</span>
+                    </span>
+                    <span class="settings-summary-arrow">›</span>
+                </summary>
+                <div class="settings-body">
+                    <div class="ot-input-row" style="padding: 12px 16px 6px 16px;">
+                        <input type="text" id="ngayOT">
+                    </div>
+                    <div class="ot-input-row" style="padding: 0 16px 12px 16px;">
+                        <select id="soGioOT" onchange="tinhToanTrucTiep()">
+                            <option value="0">0 giờ (Không tăng ca)</option>
+                            <option value="0.5">0.5 giờ</option>
+                            <option value="1">1.0 giờ</option><option value="1.5">1.5 giờ</option>
+                            <option value="2">2.0 giờ</option><option value="2.5">2.5 giờ</option>
+                            <option value="3">3.0 giờ</option><option value="3.5">3.5 giờ</option>
+                            <option value="4">4.0 giờ</option>
+                        </select>
+                    </div>
+                    <button class="btn-save-ot" onclick="luuNgayOT()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Lưu tăng ca
+                    </button>
+                </div>
+            </details>
+
+            <!-- ── Ca đêm & tăng ca (sau banner) ── -->
+                        <details class="settings-details" style="margin-top: 16px;">
+                <summary class="settings-summary">
+                    <span class="settings-summary-left">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a7a9a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                        <span>Ca đêm & giờ tăng ca</span>
+                    </span>
+                    <span class="settings-summary-arrow">›</span>
+                </summary>
+                <div class="settings-body" style="padding-bottom: 0;">
+                    
+                    <div class="settings-row">
+                        <span class="settings-row-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                        </span>
+                        <div class="settings-row-label" style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; line-height: 1.3;">
+                            <span>Số ngày ca đêm</span>
+                            <span style="font-size: 9px; color: #8a9fac; font-weight: 600;">+50% lương/ngày</span>
+                        </div>
+                        <input type="number" id="soNgayCaDem" value="0" min="0" oninput="tinhToanTrucTiep()" class="settings-row-input">
+                    </div>
+                    
+                                        <div class="settings-row" id="dongCaDem" style="display:flex; background: rgba(255,159,10,0.05);">
+                        <span class="settings-row-icon" style="color: var(--orange);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                        </span>
+                        <div class="settings-row-label" style="color: var(--orange);">Tiền PC ca đêm</div>
+                        <div style="flex: 0 0 50%; width: 50%; text-align: right; padding: 6px 10px; font-size: 14px; font-weight: 800; color: var(--orange);" id="hienPhuCapCaDem">0 ₫</div>
+                    </div>
+
+                    <div class="settings-row">
+                        <span class="settings-row-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        </span>
+                        <div class="settings-row-label" style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; line-height: 1.3;">
+                            <span>Giờ tăng ca</span>
+                            <span id="hienThiGioOTList" style="display:none; font-size: 9px; color: #8a9fac; font-weight: 600;">+ <span id="soGioOTList">0</span>h từ DS</span>
+                        </div>
+                        <input type="number" id="soGioOTNhanh" value="0" min="0" step="0.5" oninput="tinhToanTrucTiep()" class="settings-row-input">
+                    </div>
+                    
+                    <div class="settings-row" style="background: rgba(26,127,255,0.05); border-bottom: none;">
+                        <span class="settings-row-icon" style="color: var(--blue);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                        </span>
+                        <div class="settings-row-label" style="color: var(--blue);">Tổng tiền tăng ca</div>
+                        <div style="flex: 0 0 50%; width: 50%; text-align: right; padding: 6px 10px; font-size: 14px; font-weight: 800; color: var(--blue);" id="hienTongTienOT">0 ₫</div>
+                    </div>
+
+                    <button class="btn-save-ot" onclick="luuCaiDatLuong()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                        Lưu thiết lập
+                    </button>
+                </div>
+            </details>
+
+                                    <details class="settings-details">
+                <summary class="settings-summary">
+                    <span class="settings-summary-left">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a7a9a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                        <span>Tăng ca chủ nhật</span>
+                    </span>
+                    <span class="settings-summary-arrow">›</span>
+                </summary>
+                <div class="settings-body" style="padding-bottom: 0;">
+                    
+                    <div class="settings-row">
+                        <span class="settings-row-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></span>
+                        <div class="settings-row-label">Giờ tăng ca CN</div>
+                        <input type="number" id="gioCN" value="0" min="0" step="0.5" oninput="tinhToanCN()" class="settings-row-input">
+                    </div>
+                    <div class="settings-row" style="background: rgba(255,159,10,0.05);">
+                        <span class="settings-row-icon" style="color: var(--orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></span>
+                        <div class="settings-row-label" style="color: var(--orange);">Tiền giờ TC CN</div>
+                        <div style="flex: 0 0 50%; width: 50%; text-align: right; padding: 6px 10px; font-size: 14px; font-weight: 800; color: var(--orange);" id="hienTienGioCN">0 ₫</div>
+                    </div>
+
+                    <div class="settings-row">
+                        <span class="settings-row-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></span>
+                        <div class="settings-row-label">Ngày PC chủ nhật</div>
+                        <input type="number" id="ngayCN" value="0" min="0" step="1" oninput="tinhToanCN()" class="settings-row-input">
+                    </div>
+                    <div class="settings-row" style="background: rgba(255,159,10,0.05);">
+                        <span class="settings-row-icon" style="color: var(--orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></span>
+                        <div class="settings-row-label" style="color: var(--orange);">Tiền PC chủ nhật</div>
+                        <div style="flex: 0 0 50%; width: 50%; text-align: right; padding: 6px 10px; font-size: 14px; font-weight: 800; color: var(--orange);" id="hienTienPCCN">0 ₫</div>
+                    </div>
+
+                    <button class="btn-save-ot" onclick="luuTangCaCN()" style="background: linear-gradient(135deg, #ff9f0a, #e08500) !important; box-shadow: 0 4px 14px rgba(255,159,10,0.25) !important;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                        Lưu Tăng Ca CN
+                    </button>
+                </div>
+            </details>
+
+            <!-- LỊCH SỬ TĂNG CA -->
+            <h3 class="section-title">
+                <span class="stitle-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+                Lịch Sử Tăng Ca
+            </h3>
+
+            <!-- Xóa tháng -->
+            <details class="glass-card-details" style="margin-bottom:12px;">
+                <summary class="glass-card-summary">
+                    <span class="glass-card-summary-left">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a7a9a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <!-- Gemini-style 1-nét: lịch + xoá -->
+                            <rect x="3" y="4" width="18" height="17" rx="3" ry="3"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                            <line x1="9" y1="15" x2="15" y2="15"/>
+                        </svg>
+                        <span>Xoá & Xem Tháng Cũ</span>
+                    </span>
+                    <span class="glass-card-summary-arrow">›</span>
+                </summary>
+                <div class="glass-card-body">
+                    <p style="font-size:13px; color:var(--text-sub); margin:0 0 12px 0; font-weight:600;">Chọn tháng để xem lịch sử hoặc xoá toàn bộ tăng ca của tháng đó.</p>
+                    <div style="display:flex; gap:8px; margin-bottom:10px;">
+                        <select id="selectThangXoa" style="flex:1;"></select>
+                        <button class="btn-filter-clear" onclick="xoaThangOT()" style="background:rgba(255,59,92,0.08);border-color:rgba(255,59,92,0.2);">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                            Xoá Tháng
+                        </button>
+                    </div>
+                    <button class="btn-save-ot" onclick="locTheoThangChon()" style="background:linear-gradient(135deg,#5aaeff,#1a7fff) !important;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        Xem tháng này
+                    </button>
+                </div>
+            </details>
+
+            <div class="filter-bar">
+                <div class="filter-bar-row">
+                    <input type="text" id="timKiemNgayOT" onchange="trangHienTaiOT=1; hienThiDanhSachOT()">
+                    <button class="btn-filter-clear" onclick="document.getElementById('timKiemNgayOT').value=''; trangHienTaiOT=1; hienThiDanhSachOT()">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        Xóa Lọc
+                    </button>
+                </div>
+            </div>
+            <div class="history-wrap">
+                <ul class="history-list" id="danhSachOT"></ul>
+            </div>
+            <div class="pagination" id="phanTrangOT"></div>
+        </div>
+
+        <!-- TAB HỤI -->
+        <div id="tab-hui" class="tab-content">
+            <div class="nhac-nho-hui" id="nhacNhoHui" style="display:flex;align-items:center;gap:8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Sắp đến ngày đóng hụi (trong 5 ngày tới)!
+            </div>
+
+            <div class="glass-card">
+                <div class="form-group"><label>Tên chưng hụi</label><input type="text" id="tenChungHui" placeholder="Ví dụ: Hụi dây 2 triệu"></div>
+                <div class="form-group"><label>Chủ hụi (Người quản lý)</label><input type="text" id="chuHui" placeholder="Ví dụ: Dì Ba, Chị Tư..."></div>
+                <div class="form-group"><label>Ngày đóng (Dương lịch)</label><input type="text" id="ngayDongHui"></div>
+                <div class="form-group"><label>Ngày khui hụi hàng tháng (ÂM LỊCH)</label><input type="number" id="ngayAmHui" placeholder="Ví dụ: 15 (mùng 15 âm)"></div>
+                <div class="form-group"><label>Số tiền đóng (VNĐ)</label><input type="text" inputmode="numeric" id="tienDongHui" placeholder="Ví dụ: 2.000.000" oninput="dinhDangNhapLieu(this)"></div>
+                <button class="btn-save" onclick="luuTienHui()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>
+                    Lưu Thông Tin Hụi
+                </button>
+            </div>
+
+            <div class="hui-total-box">
+                <div>
+                    <div class="hui-total-label">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>
+                        Tổng đã đóng hụi
+                    </div>
+                    <div class="hui-total-amount" id="tongTienHuiDaDong">0 ₫</div>
+                </div>
+                <svg class="hui-total-icon" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>
+            </div>
+
+            <h3 class="section-title">
+                <span class="stitle-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg></span>
+                Tổng Kết Từng Chưng
+            </h3>
+            <div id="khungTongKetTungHui"></div>
+
+            <h3 class="section-title">
+                <span class="stitle-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>
+                Lịch Sử Chi Tiết
+            </h3>
+            <div class="filter-bar">
+                <div class="filter-bar-row">
+                    <input type="text" id="timKiemTenHui" placeholder="Tìm tên chưng/chủ hụi..." oninput="trangHienTaiHui=1; hienThiDanhSachHui()">
+                </div>
+                <div class="filter-bar-row">
+                    <input type="date" id="timKiemNgayHui" onchange="trangHienTaiHui=1; hienThiDanhSachHui()">
+                    <button class="btn-filter-clear" onclick="document.getElementById('timKiemTenHui').value=''; document.getElementById('timKiemNgayHui').value=''; trangHienTaiHui=1; hienThiDanhSachHui()">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        Xóa Lọc
+                    </button>
+                </div>
+            </div>
+            <div class="history-wrap">
+                <ul class="history-list" id="danhSachHui"></ul>
+            </div>
+            <div class="pagination" id="phanTrangHui"></div>
+        </div>
+
+        <!-- TAB THU-CHI -->
+        <div id="tab-thuchi" class="tab-content">
+            <div class="khu-vuc-thu">
+                <h3 style="color:var(--green);margin-top:0;font-size:17px;font-weight:900;display:flex;align-items:center;gap:8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    KHOẢN THU
+                </h3>
+                <div class="form-group">
+                    <label>Tên khoản thu</label>
+                    <div class="inline-row">
+                        <select id="selectThu" style="flex:1;"></select>
+                        <button class="btn-glass btn-glass-green" onclick="themDanhMuc('thu')">+</button>
+                        <button class="btn-glass btn-glass-red" onclick="xoaDanhMuc('thu')">Xóa</button>
+                    </div>
+                </div>
+                <div class="form-group"><label>Số tiền thu (VNĐ)</label><input type="text" inputmode="numeric" id="tienThu" placeholder="Ví dụ: 10.000.000" oninput="dinhDangNhapLieu(this)"></div>
+                <div class="form-group"><label>Ngày thu</label><input type="text" id="ngayThu"></div>
+                <button class="btn-save" style="background:linear-gradient(135deg,#27c96a,#1a9e52);" onclick="luuGiaoDich('thu')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Lưu Khoản Thu
+                </button>
+            </div>
+
+            <div class="khu-vuc-chi">
+                <h3 style="color:var(--red);margin-top:0;font-size:17px;font-weight:900;display:flex;align-items:center;gap:8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M8 12h8"/></svg>
+                    KHOẢN CHI
+                </h3>
+                <div class="form-group">
+                    <label>Tên khoản chi</label>
+                    <div class="inline-row">
+                        <select id="selectChi" style="flex:1;"></select>
+                        <button class="btn-glass btn-glass-green" onclick="themDanhMuc('chi')" style="color:var(--red);background:rgba(255,59,92,0.08);border-color:rgba(255,59,92,0.2);">+</button>
+                        <button class="btn-glass btn-glass-red" onclick="xoaDanhMuc('chi')">Xóa</button>
+                    </div>
+                </div>
+                <div class="form-group"><label>Số tiền chi (VNĐ)</label><input type="text" inputmode="numeric" id="tienChi" placeholder="Ví dụ: 500.000" oninput="dinhDangNhapLieu(this)"></div>
+                <div class="form-group"><label>Ngày chi</label><input type="text" id="ngayChi"></div>
+                <button class="btn-save" style="background:linear-gradient(135deg,#ff3b5c,#c92040);" onclick="luuGiaoDich('chi')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Lưu Khoản Chi
+                </button>
+            </div>
+
+            <div class="result-box" style="padding:16px 20px; margin-top:0;">
+                <p style="display:flex;justify-content:space-between;margin:0 0 8px 0;"><span class="thu-nhap">Tổng Thu</span> <span id="hienTongThu" class="thu-nhap">0 ₫</span></p>
+                <p style="display:flex;justify-content:space-between;margin:0 0 8px 0;"><span class="chi-phi">Tổng Chi</span> <span id="hienTongChi" class="chi-phi">0 ₫</span></p>
+                <p class="highlight"><span>SỐ DƯ</span> <span id="hienSoDu">0 ₫</span></p>
+            </div>
+
+            <h3 class="section-title">
+                <span class="stitle-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+                Lịch Sử Thu - Chi
+            </h3>
+            <div class="filter-bar">
+                <div class="filter-bar-row">
+                    <input type="text" id="timKiemThuChi" placeholder="Tìm tên giao dịch..." oninput="trangHienTaiThuChi=1; hienThiDanhSachThuChi()">
+                </div>
+                <div class="filter-bar-row">
+                    <input type="text" id="timKiemNgayThuChi" onchange="trangHienTaiThuChi=1; hienThiDanhSachThuChi()">
+                    <button class="btn-filter-clear" onclick="document.getElementById('timKiemThuChi').value=''; document.getElementById('timKiemNgayThuChi').value=''; trangHienTaiThuChi=1; hienThiDanhSachThuChi()">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        Xóa Lọc
+                    </button>
+                </div>
+            </div>
+            <div class="history-wrap">
+                <ul class="history-list" id="danhSachThuChi"></ul>
+            </div>
+            <div class="pagination" id="phanTrangThuChi"></div>
+        </div>
+
+        <!-- TAB GHI CHÚ -->
+        <div id="tab-ghichu" class="tab-content">
+            <div class="khu-vuc-ghichu">
+                <h3 style="color:var(--orange);margin-top:0;font-size:17px;font-weight:900;display:flex;align-items:center;gap:8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    THÊM GHI CHÚ
+                </h3>
+                <div class="form-group"><label>Tiêu đề (Không bắt buộc)</label><input type="text" id="tieuDeGhiChu" placeholder="Ví dụ: Cần mua đồ siêu thị..."></div>
+                <div class="form-group"><label>Nội dung ghi chú</label><textarea id="noiDungGhiChu" placeholder="Nhập nội dung cần lưu lại..."></textarea></div>
+                <button class="btn-save" style="background:linear-gradient(135deg,#ff9f0a,#e07800);" onclick="luuGhiChu()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Lưu Ghi Chú
+                </button>
+            </div>
+            <h3 class="section-title">
+                <span class="stitle-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>
+                Danh Sách Ghi Chú
+            </h3>
+            <div class="history-wrap">
+                <ul class="history-list" id="danhSachGhiChu"></ul>
+            </div>
+        </div>
+        
+                                    <div class="ai-chat-bubble" onclick="toggleKhungChatAI()" id="nutBongBongAI">
+            <div class="ai-welcome-bubble" id="aiWelcomeBubbleText">Xin chào Tú Trinh!</div>
+            
+            <svg class="icon-chat-static" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            
+            <svg class="icon-close-chat" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            
+            <svg class="icon-robot-chibi" width="46" height="46" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="10" cy="25" r="3" fill="#ffffff" opacity="0.9"/>
+                <circle cx="40" cy="25" r="3" fill="#ffffff" opacity="0.9"/>
+                <path d="M10 25C10 15 15 11 25 11C35 11 40 15 40 25" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+                <rect x="11" y="15" width="28" height="23" rx="11" fill="#ffffff" stroke="#0057d9" stroke-width="0.5"/>
+                <rect x="14" y="18" width="22" height="13" rx="6" fill="#1e293b"/>
+                <circle cx="20" cy="24" r="2" fill="#00f0ff"/>
+                <circle cx="30" cy="24" r="2" fill="#00f0ff"/>
+                <circle cx="17" cy="28" r="1.5" fill="#ff4757" opacity="0.5"/>
+                <circle cx="33" cy="28" r="1.5" fill="#ff4757" opacity="0.5"/>
+                <rect x="7" y="24" width="4" height="9" rx="2" fill="#ffffff"/>
+                <g class="ai-waving-arm">
+                    <rect x="39" y="24" width="4" height="9" rx="2" fill="#ffffff"/>
+                    <circle cx="41" cy="34" r="2" fill="#ffffff"/>
+                </g>
+                <rect x="21" y="37" width="8" height="3" rx="1.5" fill="#ffffff" opacity="0.8"/>
+            </svg>
+        </div>
+
+        <div class="ai-chat-window" id="khungCuaSoAI">
+            <div class="ai-chat-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 8px; height: 8px; background: #34c759; border-radius: 50%; animation: pulse 1.5s infinite;"></div>
+                    <strong style="font-size: 14px; color: #1a7fff;">AI Trợ Lý Của Tú Trinh</strong>
+                </div>
+                <span style="font-size: 11px; color: var(--gray); cursor: pointer; font-weight: bold;" onclick="toggleKhungChatAI()">Đóng</span>
+            </div>
+            
+            <div class="ai-chat-messages" id="vungTinNhanhAI">
+                <div class="ai-msg bot">👋 Chào Tú Trinh! Mình là Trợ lý AI dữ liệu của riêng bạn. Bạn cần mình kiểm tra tiền Hụi, tiền Lương, tăng ca, thu chi hay các Ghi chú không?</div>
+            </div>
+            
+            <div class="ai-chat-footer">
+                <input type="text" id="oNhapTinNhanhAI" class="ai-chat-input" placeholder="Hỏi AI: tiền hụi, lương, xem ghi chú..." onkeypress="if(event.keyCode===13) guiTinNhanhAI()">
+                <button class="ai-chat-btn" onclick="guiTinNhanhAI()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="19" x2="12" y2="5"></line>
+                        <polyline points="5 12 12 5 19 12"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+           <div id="aiContextBubble" class="ai-context-bubble"></div>
+            
+                    <div class="ai-chat-backdrop" id="aiChatBackdrop" onclick="toggleKhungChatAI()"></div>
+                    
+                            <div class="welcome-overlay" id="welcomeOverlay">
+            <div class="welcome-card">
+                <div class="welcome-icon-wrap">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                </div>
+                <div class="welcome-title" id="welcomeBoardTitle">ĐANG KẾT NỐI...</div>
+                <div class="welcome-text" id="welcomeBoardText">Đang đồng bộ đồng hồ hệ thống của Tú Trinh...</div>
+                <button class="welcome-btn" onclick="dongBangThongBaoChaoMung()">Cảm ơn AI Chibi ❤️</button>
+            </div>
+        </div>
+        
+
+    </div><!-- end main-app -->
+
+    <div class="footer-bar">Ứng dụng được phát triển bởi PHỤC PRO P.128 ✦</div>
+
+    </div>```
+    
+   
+
+    <!-- MODAL -->
+    <div id="custom-modal-overlay">
+        <div id="custom-modal">
+            <div id="custom-modal-title">Chào Tú Trinh 😍</div>
+            <div id="custom-modal-body">
+                <div id="custom-modal-message"></div>
+                <div id="custom-modal-input-container"><input type="text" id="custom-modal-input" placeholder="Nhập tại đây..."></div>
+            </div>
+            <div id="custom-modal-buttons">
+                <button id="custom-modal-btn-cancel">Hủy</button>
+                <button id="custom-modal-btn-ok">Đồng ý</button>
             </div>
         </div>
     </div>
 
-    <div id="admin-panel-modal" class="modal-overlay">
-        <div class="modal-content glass-panel">
-            <h2>➕ Thêm Media</h2>
-            <select id="media-type" class="glass-input">
-                <option value="video">🎥 Video</option>
-                <option value="music">🎵 Nhạc</option>
-            </select>
-            <input type="text" id="media-title" class="glass-input" placeholder="Tiêu đề">
-            <input type="text" id="media-author" class="glass-input" placeholder="Tác giả">
-            <input type="text" id="media-url" class="glass-input" placeholder="Link (mp4/mp3)">
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn btn-cancel" onclick="closeAdminPanel()">Đóng</button>
-                <button class="btn btn-success" onclick="saveCustomMedia()">Lưu</button>
-            </div>
-        </div>
-    </div>
+</div><!-- end app-container -->
 
-    <nav class="bottom-nav glass-panel">
-        <div class="nav-item active">🏠<br>Trang chủ</div>
-        <div class="nav-item">📁<br>Tập tin</div>
-        <div class="nav-item" onclick="location.reload()">🔄<br>Làm mới</div>
-    </nav>
+<script>
+    // ==========================================
+    // FIREBASE CONFIG
+    // ==========================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyAdBaEhyLNvFwK13694yKrwVcVXktXF0cw",
+        authDomain: "tutrinhapp-ece0e.firebaseapp.com",
+        databaseURL: "https://tutrinhapp-ece0e-default-rtdb.firebaseio.com",
+        projectId: "tutrinhapp-ece0e",
+        storageBucket: "tutrinhapp-ece0e.firebasestorage.app",
+        messagingSenderId: "383894640245",
+        appId: "1:383894640245:web:590cc3db42ec2992fbca3c"
+    };
+    if (firebaseConfig.apiKey !== "CHUA_CO") firebase.initializeApp(firebaseConfig);
+    const db = typeof firebase !== 'undefined' ? firebase.database() : null;
+    const auth = typeof firebase !== 'undefined' ? firebase.auth() : null;
+    const provider = typeof firebase !== 'undefined' ? new firebase.auth.GoogleAuthProvider() : null;
+        let myKey = "";
+    
+    // --- KHAI BÁO BIẾN CHO ADMIN TEST ---
+    let logoTapCount = 0;
+    let isAdminTest = false;
 
-    <script src="script.js"></script>
+        function xuLyGoLogo() {
+        logoTapCount++;
+        clearTimeout(window.logoTimeout);
+        // Reset biến đếm nếu dừng gõ quá 3 giây
+        window.logoTimeout = setTimeout(() => { logoTapCount = 0; }, 3000); 
+        
+        if (logoTapCount >= 5) {
+            logoTapCount = 0;
+            hopThoaiTuTrinh('prompt', '🔑 Nhập mã Admin để vào test:').then(pass => {
+                // Đợi 450ms để bảng nhập mật khẩu đóng hoàn toàn rồi mới mở bảng thông báo mới
+                setTimeout(() => {
+                    if (pass === '2411') {
+                        isAdminTest = true;
+                        myKey = "admin_test"; // Tạo key ảo
+                        
+                        // Khởi tạo dữ liệu giả lập trống
+                        lichSuOT=[]; lichSuHui=[]; lichSuThuChi=[]; danhSachGhiChuArr=[];
+                        danhMucThu=["Lương"]; danhMucChi=["Tiền trọ","Tiền chợ","Mua mỹ phẩm","Phục mượn","Tiền xăng","Mua đồ online","Mua linh tinh"];
+                        setInputNumber('luongCoBan',5660000); document.getElementById('soNgayCaDem').value=0;
+                        setInputNumber('phuCapInput',700000); document.getElementById('soGioOTNhanh').value=0;
+                        document.getElementById('gioCN').value = 0; document.getElementById('ngayCN').value = 0;
+
+                        // Mở App và tải dữ liệu
+                        document.getElementById('login-screen').style.display='none';
+                        document.getElementById('main-app').style.display='block';
+                        taiDuLieuLuong(); tinhToanCN(); taiDuLieuHui(); capNhatGiaoDienDanhMuc(); hienThiDanhSachThuChi(); hienThiGhiChu(); capNhatSelectThangXoa();
+                        setTimeout(attachDetailsAnimations, 100);
+                        
+                        tuTrinhAlert("⚠️ Bạn đang ở chế độ ADMIN TEST.<br>Dữ liệu sẽ KHÔNG được lưu lên Firebase!");
+                    } else if (pass !== null && pass !== '') {
+                        tuTrinhAlert("❌ Sai mật khẩu Admin!");
+                    }
+                }, 450); 
+            });
+        }
+    }
+
+
+    const SO_DONG_MOI_TRANG = 5;
+    let trangHienTaiOT = 1, trangHienTaiHui = 1, trangHienTaiThuChi = 1;
+
+    // lichSuOT: [{ ngay: "YYYY-MM-DD", gio: Number, thang: "YYYY-MM" }]
+    let lichSuOT = [];
+    let lichSuHui = [];
+    let lichSuThuChi = [];
+    let danhSachGhiChuArr = [];
+    let viTriSuaGhiChu = -1;
+    let danhMucThu = ["Lương"];
+    let danhMucChi = ["Tiền trọ","Tiền chợ","Mua mỹ phẩm","Phục mượn","Tiền xăng","Mua đồ online","Mua linh tinh"];
+
+        // ===== BỘ CẢM BIẾN VUỐT CHỐNG NHẢY TAB KHI LƯỚT DỌC =====
+    let touchstartX = 0, touchstartY = 0;
+    let touchendX = 0, touchendY = 0;
+
+    document.addEventListener('touchstart', e => {
+        touchstartX = e.changedTouches[0].screenX;
+        touchstartY = e.changedTouches[0].screenY; // Đo thêm điểm chạm lướt dọc
+    }, {passive:true});
+
+    document.addEventListener('touchend', e => {
+        touchendX = e.changedTouches[0].screenX;
+        touchendY = e.changedTouches[0].screenY; // Đo thêm điểm nhấc ngón tay lướt dọc
+        if(document.getElementById('main-app').style.display === 'block') checkDirection();
+    }, {passive:true});
+
+    function checkDirection() {
+        let deltaX = touchendX - touchstartX; // Khoảng cách đi theo chiều ngang
+        let deltaY = touchendY - touchstartY; // Khoảng cách đi theo chiều dọc
+        
+        let t = 75; // Tăng độ nhạy lướt ngang lên 75px để tránh vô tình quẹt trúng
+        
+        // ĐIỀU KIỆN CHỐNG NHẢY TAB TOÁN HỌC:
+        // Lực lướt ngang (deltaX) phải mạnh hơn hẳn lực lướt dọc (deltaY) thì mới cho phép qua tab
+        if (Math.abs(deltaX) > t && Math.abs(deltaX) > Math.abs(deltaY)) {
+            if (deltaX < 0) {
+                chuyenTabTheoHuong(1);  // Vuốt từ phải sang trái -> Qua tab tiếp theo
+            } else {
+                chuyenTabTheoHuong(-1); // Vuốt từ trái sang phải -> Về tab phía trước
+            }
+        }
+    }
+    function chuyenTabTheoHuong(h) {
+        const tabs = ['tab-luong','tab-hui','tab-thuchi','tab-ghichu'];
+        const btns = document.querySelectorAll('.tab-btn');
+        let cur = 0;
+        for(let i=0;i<tabs.length;i++) if(document.getElementById(tabs[i]).classList.contains('active')) { cur=i; break; }
+        let next = cur + h;
+        if(next >= 0 && next < tabs.length) chuyenTab(tabs[next], btns[next]);
+    }
+
+    // ===== HELPERS =====
+    function dinhDangNgayVN(ng) { if(!ng) return ""; let p=ng.split('-'); if(p.length===3) return p[2]+'-'+p[1]+'-'+p[0]; return ng; }
+    function dinhDangNhapLieu(input) { let v=input.value.replace(/\./g,'').replace(/\D/g,''); input.value = v!==""?v.replace(/\B(?=(\d{3})+(?!\d))/g,'.'):""; }
+    function laySoTuInput(id) { return Number(document.getElementById(id).value.replace(/\./g,'')) || 0; }
+    function formatVND(t) { return t.toLocaleString('vi-VN') + " ₫"; }
+    function setInputNumber(id,v) { document.getElementById(id).value = v.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.'); }
+    function layThangHienTai() { let n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0'); }
+    function layNhanThang(ym) { if(!ym) return ""; let [y,m]=ym.split('-'); return `Tháng ${parseInt(m)}/${y}`; }
+
+    // ===== MODAL =====
+    function hopThoaiTuTrinh(type, message) {
+        return new Promise((resolve) => {
+            const overlay = document.getElementById('custom-modal-overlay');
+            const msgEl = document.getElementById('custom-modal-message');
+            const inputContainer = document.getElementById('custom-modal-input-container');
+            const inputEl = document.getElementById('custom-modal-input');
+            const btnOk = document.getElementById('custom-modal-btn-ok');
+            const btnCancel = document.getElementById('custom-modal-btn-cancel');
+            msgEl.innerHTML = message; inputEl.value = '';
+            if(type==='alert') { inputContainer.style.display='none'; btnCancel.style.display='none'; }
+            else if(type==='confirm') { inputContainer.style.display='none'; btnCancel.style.display='block'; }
+            else if(type==='prompt') { inputContainer.style.display='block'; btnCancel.style.display='block'; setTimeout(()=>inputEl.focus(),300); }
+            overlay.classList.add('show');
+            const close = () => { overlay.classList.remove('show'); setTimeout(()=>{btnOk.onclick=null;btnCancel.onclick=null;},400); };
+            btnOk.onclick = () => { close(); resolve(type==='prompt'?inputEl.value:true); };
+            btnCancel.onclick = () => { close(); resolve(type==='prompt'?null:false); };
+        });
+    }
+    const tuTrinhAlert = msg => hopThoaiTuTrinh('alert', msg);
+    const tuTrinhConfirm = msg => hopThoaiTuTrinh('confirm', msg);
+    const tuTrinhPrompt = msg => hopThoaiTuTrinh('prompt', msg);
+
+    // ===== SYNC =====
+        function dongBoLenMay() {
+        // Chặn hoàn toàn việc đẩy data lên Firebase nếu đang ở chế độ Test
+        if(isAdminTest) return; 
+        if(!db || !myKey) return;
+        db.ref('DuLieu_TuTrinh/' + myKey).set({
+            lichSuOT, lichSuHui, lichSuThuChi,
+            danhMucThu, danhMucChi, ghiChu: danhSachGhiChuArr,
+            caiDatLuong: {
+                luongCoBan: laySoTuInput('luongCoBan') || 5660000,
+                soNgayCaDem: Number(document.getElementById('soNgayCaDem').value) || 0,
+                phuCap: laySoTuInput('phuCapInput') || 0,
+                soGioOTNhanh: Number(document.getElementById('soGioOTNhanh').value) || 0,
+                gioCN: Number(document.getElementById('gioCN').value) || 0,
+                ngayCN: Number(document.getElementById('ngayCN').value) || 0
+            }
+        });
+    }
+
+    // ===== AUTH =====
+    window.onload = () => {
+        let today = new Date().toISOString().split('T')[0];
+        ['ngayOT','ngayDongHui','ngayThu','ngayChi'].forEach(id => document.getElementById(id).value = today);
+        // Ép tất cả các ô lịch hiển thị tiếng Việt và chặn lịch mặc định của máy
+        flatpickr("#ngayOT, #timKiemNgayOT, #ngayDongHui, #timKiemNgayHui, #ngayThu, #ngayChi, #timKiemNgayThuChi", {
+            locale: "vn", // Ngôn ngữ Tiếng Việt
+            dateFormat: "Y-m-d", // Giữ nguyên định dạng để không lỗi Firebase
+            disableMobile: true // Chặn không cho điện thoại tự kích hoạt lịch tiếng Anh của máy
+        });
+        
+        if(firebaseConfig.apiKey==="CHUA_CO") {
+            document.getElementById('login-msg').innerText = "LỖI: Chưa dán Khóa Firebase";
+            document.getElementById('login-msg').style.color = "var(--red)"; return;
+        }
+        if(auth) {
+            document.getElementById('login-loader').style.display = 'block';
+            document.getElementById('btn-login-google').style.display = 'none';
+            document.getElementById('login-msg').innerText = "Đang kiểm tra đăng nhập...";
+            auth.getRedirectResult().catch(err => {
+                document.getElementById('login-loader').style.display = 'none';
+                document.getElementById('btn-login-google').style.display = 'flex';
+                tuTrinhAlert("Lỗi Redirect: " + err.message);
+            });
+        }
+                            // ===== HỆ THỐNG KIỂM TRA TRẠNG THÁI ĐĂNG NHẬP & BẬT THÔNG BÁO THEO GIỜ THỰC =====
+        auth.onAuthStateChanged(user => {
+            if(user) {
+                myKey = user.uid;
+                
+                // 1. Mở màn hình ứng dụng chính và ẩn màn hình đăng nhập đi
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+                
+                // 2. KÍCH HOẠT TỰ ĐỘNG BẢNG CHÀO MỪNG THEO GIỜ THỰC (ĐẬP TAN LỖI TRỐNG LỆNH) 🎉
+                kichHoatThongBaoTheoGio();
+                
+                // 3. Tải dữ liệu sổ sách tiền nong về máy Trinh
+                taiDuLieuTuMay();
+            } else {
+                // Trạng thái chưa đăng nhập hoặc bấm đăng xuất
+                document.getElementById('login-loader').style.display = 'none';
+                document.getElementById('btn-login-google').style.display = 'flex';
+                document.getElementById('login-msg').innerText = "Quản Lý Tài Chính Thông Minh Của Bạn";
+                document.getElementById('login-screen').style.display = 'flex';
+                document.getElementById('main-app').style.display = 'none';
+            }
+        });
+    };
+
+    function xuLyDangNhapGoogle() {
+        document.getElementById('btn-login-google').style.display = 'none';
+        document.getElementById('login-loader').style.display = 'block';
+        document.getElementById('login-msg').innerText = "Đang kết nối...";
+        auth.signInWithPopup(provider).catch(err => {
+            if(err.code==='auth/popup-blocked'||err.code==='auth/popup-closed-by-user') {
+                auth.signInWithRedirect(provider);
+            } else {
+                document.getElementById('login-loader').style.display = 'none';
+                document.getElementById('btn-login-google').style.display = 'flex';
+                tuTrinhAlert("Lỗi: " + err.message);
+            }
+        });
+    }
+
+    async function dangXuatTaikhoan() {
+        if(await tuTrinhConfirm("Bạn có chắc chắn muốn đăng xuất?")) auth.signOut().then(()=>location.reload());
+    }
+
+    function taiDuLieuTuMay() {
+        db.ref('DuLieu_TuTrinh/' + myKey).once('value').then(snap => {
+            let data = snap.val();
+            if(data) {
+                lichSuOT = (data.lichSuOT || []).map(item => ({
+                    ...item,
+                    thang: item.thang || (item.ngay ? item.ngay.substring(0,7) : layThangHienTai())
+                }));
+                lichSuHui = data.lichSuHui || [];
+                lichSuThuChi = data.lichSuThuChi || [];
+                danhMucThu = data.danhMucThu || ["Lương"];
+                danhMucChi = data.danhMucChi || ["Tiền trọ","Tiền chợ","Mua mỹ phẩm","Phục mượn","Tiền xăng","Mua đồ online","Mua linh tinh"];
+                danhSachGhiChuArr = data.ghiChu || [];
+                if(data.caiDatLuong) {
+                    setInputNumber('luongCoBan', data.caiDatLuong.luongCoBan || 5660000);
+                    document.getElementById('soNgayCaDem').value = data.caiDatLuong.soNgayCaDem || 0;
+                    setInputNumber('phuCapInput', data.caiDatLuong.phuCap != null ? data.caiDatLuong.phuCap : 700000);
+                    document.getElementById('soGioOTNhanh').value = data.caiDatLuong.soGioOTNhanh || 0;
+                    document.getElementById('gioCN').value = data.caiDatLuong.gioCN || 0;
+                    document.getElementById('ngayCN').value = data.caiDatLuong.ngayCN || 0;
+                } else {
+                    setInputNumber('luongCoBan', 5660000);
+                    document.getElementById('soNgayCaDem').value = 0;
+                    setInputNumber('phuCapInput', 700000);
+                    document.getElementById('soGioOTNhanh').value = 0;
+                    document.getElementById('gioCN').value = 0;
+                    document.getElementById('ngayCN').value = 0;
+                }
+            } else {
+                lichSuOT=[]; lichSuHui=[]; lichSuThuChi=[]; danhSachGhiChuArr=[];
+                danhMucThu=["Lương"]; danhMucChi=["Tiền trọ","Tiền chợ","Mua mỹ phẩm","Phục mượn","Tiền xăng","Mua đồ online","Mua linh tinh"];
+                setInputNumber('luongCoBan',5660000); document.getElementById('soNgayCaDem').value=0;
+                setInputNumber('phuCapInput',700000); document.getElementById('soGioOTNhanh').value=0;
+                dongBoLenMay();
+            }
+            document.getElementById('login-screen').style.display='none';
+            document.getElementById('main-app').style.display='block';
+            taiDuLieuLuong(); tinhToanCN(); taiDuLieuHui(); capNhatGiaoDienDanhMuc(); hienThiDanhSachThuChi(); hienThiGhiChu();
+            capNhatSelectThangXoa();
+            setTimeout(attachDetailsAnimations, 100);
+        }).catch(err => tuTrinhAlert("Lỗi tải dữ liệu: " + err.message));
+    }
+
+        // ===== HÀM CHUYỂN TAB THÔNG MINH - TỰ ĐỘNG KHÔI PHỤC TIÊU ĐỀ THEO TAB =====
+    function chuyenTab(tabId, btnEl) {
+        document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        const targetTab = document.getElementById(tabId);
+        if(targetTab) targetTab.classList.add('active');
+        if(btnEl) btnEl.classList.add('active');
+        
+        // Mỗi khi bấm đổi tab hoặc vuốt chuyển tab, gọi lệnh cập nhật lại tiêu đề ngay lập tức
+        if (typeof capNhatTieuDeTheoCuon === 'function') {
+            capNhatTieuDeTheoCuon();
+        }
+    }
+
+    // ===== LƯƠNG / OT =====
+    function themCaDem() { document.getElementById('soNgayCaDem').value = Number(document.getElementById('soNgayCaDem').value)+1; tinhToanTrucTiep(); }
+    function themGioOTNhanh() { document.getElementById('soGioOTNhanh').value = Number(document.getElementById('soGioOTNhanh').value)+0.5; tinhToanTrucTiep(); }
+
+    async function luuCaiDatLuong() { dongBoLenMay(); await tuTrinhAlert("Đã lưu thiết lập lên mây ☁️!"); }
+
+    function tinhToanTrucTiep() {
+        let luong = laySoTuInput('luongCoBan');
+        let caDem = Number(document.getElementById('soNgayCaDem').value) || 0;
+        let phuCap = laySoTuInput('phuCapInput') || 0;
+        let otNhanh = Number(document.getElementById('soGioOTNhanh').value) || 0;
+
+        let bh = (luong * 0.105) + 25500;
+        let thangHT = layThangHienTai();
+
+        // Chỉ tính OT của tháng hiện tại
+        let listOTHours = lichSuOT.filter(i => i.thang === thangHT).reduce((t,i)=>t+i.gio, 0);
+        let tongOTHours = listOTHours + otNhanh;
+        let tongOT = tongOTHours * (luong / 24 / 8 * 1.5);
+        let phuCapCD = (luong / 24) * 0.5 * caDem;
+
+        document.getElementById('hienLCB').innerText = formatVND(luong);
+        document.getElementById('hienBHXH').innerText = "-" + formatVND(luong*0.08);
+        document.getElementById('hienBHYT').innerText = "-" + formatVND(luong*0.015);
+        document.getElementById('hienBHTN').innerText = "-" + formatVND(luong*0.01);
+        document.getElementById('hienPhuCapKhac').innerText = "+" + formatVND(phuCap);
+        document.getElementById('hienTongTienOT').innerText = "+" + formatVND(tongOT);
+
+        if(listOTHours > 0) {
+            document.getElementById('hienThiGioOTList').style.display = 'inline';
+            document.getElementById('soGioOTList').innerText = listOTHours;
+        } else {
+            document.getElementById('hienThiGioOTList').style.display = 'none';
+        }
+
+                       /* Luôn hiện dòng Tiền phụ cấp ca đêm */
+        document.getElementById('dongCaDem').style.display = 'flex';
+        if(caDem > 0) {
+            document.getElementById('hienPhuCapCaDem').innerText = "+" + formatVND(phuCapCD);
+        } else {
+            document.getElementById('hienPhuCapCaDem').innerText = "0 ₫";
+        }
+
+        let gioCN = Number(document.getElementById('gioCN').value) || 0;
+        let ngayCN = Number(document.getElementById('ngayCN').value) || 0;
+                let tienGioCN = gioCN * (luong / 24 / 8 * 2); /* Tính 200% lương 1 giờ */
+        let tienPCCN = ngayCN * (200000 / 24);
+        let tongCN = tienGioCN + tienPCCN;
+        tinhToanCN();
+        let thucLanh = luong - bh + tongOT + phuCapCD + phuCap + tongCN;
+                document.getElementById('hienThucLanh').innerText = formatVND(thucLanh);
+        if(document.getElementById('hienThucLanhHeader')) document.getElementById('hienThucLanhHeader').innerText = formatVND(thucLanh);
+        if(document.getElementById('hienThucLanhFoot')) document.getElementById('hienThucLanhFoot').innerText = formatVND(thucLanh);
+        // Chips
+        let bhTong = luong*0.105 + 25500;
+        if(document.getElementById('chipPhuCap')) document.getElementById('chipPhuCap').innerText = Math.round(phuCap/1000)+'k';
+        if(document.getElementById('chipOT')) document.getElementById('chipOT').innerText = Math.round(tongOT/1000)+'k';
+        if(document.getElementById('chipCN')) document.getElementById('chipCN').innerText = Math.round(tongCN/1000)+'k';
+        if(document.getElementById('chipBH')) document.getElementById('chipBH').innerText = Math.round(bhTong/1000)+'k';
+
+                // Cập nhật banner tháng OT (Tính theo tháng/năm thực tế từ lịch điện thoại)
+        let liveDate = new Date();
+        let liveMonth = String(liveDate.getMonth() + 1).padStart(2, '0');
+        let liveYear = liveDate.getFullYear();
+        document.getElementById('tenThangHienTai').innerText = `Giờ tăng ca: tháng ${liveMonth}/${liveYear}`;
+    }
+
+    function hienThiChiTietOTBanner() {
+        let thangHT = layThangHienTai();
+        let listOTHours = lichSuOT.filter(i => i.thang === thangHT).reduce((t,i)=>t+i.gio, 0);
+        let otNhanh = Number(document.getElementById('soGioOTNhanh').value) || 0;
+        
+        let msg = `Nhập từ DS: ${listOTHours} giờ<br>Nhập Nhanh: ${otNhanh} giờ`;
+        tuTrinhAlert(msg);
+    }
+
+                            // ===== THUẬT TOÁN ĐẾM SỐ TĂNG DẦN CHUẨN FINTECH APP =====
+        function safeAnimateCount(id, targetVal) {
+        let el = document.getElementById(id);
+        if (!el) return;
+        
+        let startVal = Number(el.dataset.currentValue) || 0;
+        if (startVal === targetVal) {
+            el.innerText = formatVND(targetVal);
+            // Đồng bộ luôn lên ô trên thanh tiêu đề
+            let elHeader = document.getElementById('hienThucLanhHeader');
+            if (elHeader) elHeader.innerText = formatVND(targetVal);
+            return;
+        }
+        
+        el.dataset.currentValue = targetVal;
+        let elHeader = document.getElementById('hienThucLanhHeader');
+                
+        if (elHeader) elHeader.dataset.currentValue = targetVal;
+        
+        let duration = 450; 
+        let startTime = null;
+        
+        function step(timestamp) {
+            if (!startTime) startTime = timestamp;
+            let progress = timestamp - startTime;
+            let percentage = Math.min(progress / duration, 1);
+            let easeProgress = 1 - Math.pow(1 - percentage, 3);
+            
+            let currentCount = Math.floor(startVal + (targetVal - startVal) * easeProgress);
+            let formatted = formatVND(currentCount);
+            
+            // Tiền nhảy đồng thời cả 2 nơi!
+            el.innerText = formatted;
+            if (elHeader) elHeader.innerText = formatted; 
+            
+            if (percentage < 1) {
+                requestAnimationFrame(step);
+            } else {
+                el.innerText = formatVND(targetVal);
+                if (elHeader) elHeader.innerText = formatVND(targetVal);
+            }
+        }
+        requestAnimationFrame(step);
+    }
+
+    function tinhToanCN() {
+        let luong = laySoTuInput('luongCoBan');
+        let gioCN = Number(document.getElementById('gioCN').value) || 0;
+        let ngayCN = Number(document.getElementById('ngayCN').value) || 0;
+
+        let tienGioCN = gioCN * ((luong / 24 / 8) * 2);
+        let tienPCCN = ngayCN * (200000 / 24);
+        let tongCN = tienGioCN + tienPCCN;
+
+        function safeSet(id, val) { let el = document.getElementById(id); if (el) el.innerText = val; }
+        
+        safeSet('hienTienGioCN', formatVND(tienGioCN));
+        safeSet('hienTienPCCN', formatVND(tienPCCN));
+        safeSet('hienTongTCCN_Final', formatVND(tongCN));
+
+        // Tính toán tổng thực lãnh tổng thể
+        let bh = (luong * 0.105) + 25500;
+        let otNhanh = Number(document.getElementById('soGioOTNhanh').value) || 0;
+        let phuCap = laySoTuInput('phuCapInput') || 0;
+        let caDem = Number(document.getElementById('soNgayCaDem').value) || 0;
+        let tongOT = (lichSuOT.filter(i => i.thang === layThangHienTai()).reduce((t,i)=>t+i.gio, 0) + otNhanh) * (luong / 24 / 8 * 1.5);
+        let phuCapCD = (luong / 24) * 0.5 * caDem;
+        
+        let thucLanh = luong - bh + tongOT + phuCapCD + phuCap + tongCN;
+        
+        // 🚀 KÍCH HOẠT ĐỘNG CƠ CHẠY SỐ MƯỢT MÀ CHO TỔNG THỰC LÃNH
+        safeAnimateCount('hienThucLanh', thucLanh);
+        
+                safeSet('hienThucLanh', formatVND(thucLanh));              
+        safeSet('hienThucLanhHeader', formatVND(thucLanh));
+        if(document.getElementById('chipCN')) document.getElementById('chipCN').innerText = Math.round(tongCN/1000)+'k';
+    }    
+
+
+    async function luuTangCaCN() {
+        dongBoLenMay();
+        await tuTrinhAlert('Đã lưu Tăng Ca Chủ Nhật lên mây ☁️!');
+    }
+
+    async function luuNgayOT() {
+        let ngay = document.getElementById('ngayOT').value;
+        let gio = Number(document.getElementById('soGioOT').value);
+        if(gio <= 0) { await tuTrinhAlert("Chọn số giờ lớn hơn 0"); return; }
+        let thang = ngay.substring(0, 7);
+        lichSuOT.push({ ngay, gio, thang });
+        dongBoLenMay();
+        document.getElementById('soGioOT').value = "0";
+        trangHienTaiOT = 1;
+        taiDuLieuLuong();
+        capNhatSelectThangXoa();
+        await tuTrinhAlert("Đã lưu Tăng ca lên mây ☁️!");
+    }
+
+    function taiDuLieuLuong() { tinhToanTrucTiep(); hienThiDanhSachOT(); }
+
+    function hienThiDanhSachOT() {
+        let ul = document.getElementById('danhSachOT'); ul.innerHTML = "";
+        let kNgay = document.getElementById('timKiemNgayOT').value;
+        let loc = lichSuOT.filter(i => !kNgay || i.ngay === kNgay).sort((a,b)=>new Date(b.ngay)-new Date(a.ngay));
+        let pages = Math.ceil(loc.length / SO_DONG_MOI_TRANG) || 1;
+        if(trangHienTaiOT > pages) trangHienTaiOT = pages;
+
+        if(loc.length === 0) {
+            ul.innerHTML = "<li style='justify-content:center;color:var(--gray);'>Chưa có lịch sử tăng ca</li>";
+        } else {
+            loc.slice((trangHienTaiOT-1)*SO_DONG_MOI_TRANG, trangHienTaiOT*SO_DONG_MOI_TRANG).forEach(i => {
+                let idx = lichSuOT.indexOf(i);
+                let li = document.createElement('li');
+                let thangLabel = i.thang ? `<br><small style="color:var(--gray);font-size:11px;">${layNhanThang(i.thang)}</small>` : '';
+                li.innerHTML = `<span><span class="ngay-hien-thi">${dinhDangNgayVN(i.ngay)}</span>${thangLabel}</span> <span>⏱️ <b>${i.gio} giờ</b> <button onclick="xoaOT(${idx})" class="btn-delete-small">Xóa</button></span>`;
+                ul.appendChild(li);
+            });
+        }
+        taoNutPhanTrang('phanTrangOT', pages, trangHienTaiOT, p => { trangHienTaiOT=p; hienThiDanhSachOT(); });
+    }
+
+    async function xoaOT(idx) {
+        if(await tuTrinhConfirm("Chắc chắn xóa?")) {
+            lichSuOT.splice(idx,1); dongBoLenMay(); taiDuLieuLuong(); capNhatSelectThangXoa();
+        }
+    }
+
+    // ===== XÓA THÁNG OT =====
+    function layDanhSachThang() {
+        let thangSet = new Set();
+        lichSuOT.forEach(i => {
+            let t = i.thang || (i.ngay ? i.ngay.substring(0,7) : null);
+            if(t) thangSet.add(t);
+        });
+        return Array.from(thangSet).sort().reverse();
+    }
+
+    function capNhatSelectThangXoa() {
+        let sel = document.getElementById('selectThangXoa');
+        if(!sel) return;
+        let danhSach = layDanhSachThang();
+        sel.innerHTML = danhSach.length === 0
+            ? '<option value="">-- Chưa có dữ liệu --</option>'
+            : danhSach.map(t => `<option value="${t}">${layNhanThang(t)} (${lichSuOT.filter(i=>i.thang===t).reduce((s,i)=>s+i.gio,0)} giờ)</option>`).join('');
+    }
+
+    async function xoaThangOT() {
+        let thang = document.getElementById('selectThangXoa').value;
+        if(!thang) { await tuTrinhAlert("Chưa có tháng nào để xóa!"); return; }
+        let soMuc = lichSuOT.filter(i=>i.thang===thang).length;
+        if(soMuc === 0) { await tuTrinhAlert("Tháng này không có dữ liệu tăng ca."); return; }
+        if(await tuTrinhConfirm(`Xoá toàn bộ ${soMuc} mục tăng ca của ${layNhanThang(thang)}?\n\nHành động này không thể hoàn tác!`)) {
+            lichSuOT = lichSuOT.filter(i=>i.thang!==thang);
+            dongBoLenMay(); taiDuLieuLuong(); capNhatSelectThangXoa();
+            await tuTrinhAlert(`Đã xoá tăng ca ${layNhanThang(thang)} thành công`);
+        }
+    }
+
+    function locTheoThangChon() {
+        let thang = document.getElementById('selectThangXoa').value;
+        if(!thang) return;
+        // Tìm ngày đầu tháng và set vào filter
+        let ngayLoc = thang + '-01';
+        // Thay vì lọc theo ngày cụ thể, ta filter tháng trong hienThiDanhSachOT
+        document.getElementById('timKiemNgayOT').value = '';
+        _locThangOT = thang;
+        trangHienTaiOT = 1;
+        hienThiDanhSachOTTheoThang(thang);
+    }
+
+    let _locThangOT = null;
+
+    function hienThiDanhSachOTTheoThang(thang) {
+        let ul = document.getElementById('danhSachOT'); ul.innerHTML = "";
+        let loc = lichSuOT.filter(i => i.thang === thang).sort((a,b)=>new Date(b.ngay)-new Date(a.ngay));
+        let pages = Math.ceil(loc.length / SO_DONG_MOI_TRANG) || 1;
+
+        if(loc.length === 0) {
+            ul.innerHTML = `<li style='justify-content:center;color:var(--gray);'>${layNhanThang(thang)} chưa có tăng ca</li>`;
+        } else {
+            loc.slice((trangHienTaiOT-1)*SO_DONG_MOI_TRANG, trangHienTaiOT*SO_DONG_MOI_TRANG).forEach(i => {
+                let idx = lichSuOT.indexOf(i);
+                let li = document.createElement('li');
+                li.innerHTML = `<span class="ngay-hien-thi">${dinhDangNgayVN(i.ngay)}</span> <span>⏱️ <b>${i.gio} giờ</b> <button onclick="xoaOT(${idx})" class="btn-delete-small">Xóa</button></span>`;
+                ul.appendChild(li);
+            });
+        }
+        taoNutPhanTrang('phanTrangOT', pages, trangHienTaiOT, p => { trangHienTaiOT=p; hienThiDanhSachOTTheoThang(thang); });
+    }
+
+    // ===== HỤI =====
+    function dienNhanhThongTin(btn) {
+        document.getElementById('tenChungHui').value = btn.getAttribute('data-ten');
+        document.getElementById('chuHui').value = btn.getAttribute('data-chuhui');
+        document.getElementById('tienDongHui').focus();
+    }
+
+    async function luuTienHui() {
+        let ten = document.getElementById('tenChungHui').value.trim(), chuHui = document.getElementById('chuHui').value.trim();
+        let ngay = document.getElementById('ngayDongHui').value, tien = laySoTuInput('tienDongHui');
+        let ngayAm = document.getElementById('ngayAmHui').value.trim();
+        if(!ten || !ngay || tien <= 0) return await tuTrinhAlert("Nhập đủ thông tin!");
+        lichSuHui.push({ten, chuHui, ngay, tien, ngayAm});
+        dongBoLenMay();
+        document.getElementById('tienDongHui').value = "";
+        document.getElementById('ngayAmHui').value = "";
+        trangHienTaiHui = 1; taiDuLieuHui();
+        await tuTrinhAlert("Đã lưu trên mây ☁️!");
+    }
+
+    function taiDuLieuHui() {
+        let tong=0, nhom={}, nhacNho=false;
+        let today = new Date(); today.setHours(0,0,0,0);
+        let currentLunarDay = today.getDate();
+        try {
+            let parts = new Intl.DateTimeFormat('vi-VN-u-ca-chinese',{day:'numeric'}).formatToParts(today);
+            let ds = parts.find(p=>p.type==='day').value;
+            currentLunarDay = parseInt(ds);
+        } catch(e){}
+
+        lichSuHui.forEach(i => {
+            tong += i.tien;
+            let key = i.ten+"|"+i.chuHui;
+            if(!nhom[key]) nhom[key]={ten:i.ten,chuHui:i.chuHui,tong:0,thang:0,ngayBD:i.ngay,ngayCuoi:i.ngay,ngayAm:i.ngayAm};
+            nhom[key].tong+=i.tien; nhom[key].thang+=1;
+            let di = new Date(i.ngay); di.setHours(0,0,0,0);
+            if(di < new Date(nhom[key].ngayBD)) nhom[key].ngayBD=i.ngay;
+            if(di > new Date(nhom[key].ngayCuoi)) { nhom[key].ngayCuoi=i.ngay; nhom[key].ngayAm=i.ngayAm; }
+        });
+
+        for(let k in nhom) {
+            let cachNgay=999, tld=parseInt(nhom[k].ngayAm);
+            if(!isNaN(tld)&&tld>0&&tld<=30) { let d=tld-currentLunarDay; if(d<0) d+=30; cachNgay=d; }
+            else {
+                let nb=new Date(nhom[k].ngayBD), nd=nb.getDate();
+                let nt=new Date(today.getFullYear(),today.getMonth(),nd);
+                if(nt<today) nt.setMonth(nt.getMonth()+1);
+                cachNgay=Math.floor((nt-today)/(1000*60*60*24));
+            }
+            if(cachNgay>=0&&cachNgay<=5) {
+                let nc=new Date(nhom[k].ngayCuoi); nc.setHours(0,0,0,0);
+                if(Math.floor((today-nc)/(1000*60*60*24))>10) nhacNho=true;
+            }
+        }
+
+        document.getElementById('tongTienHuiDaDong').innerText = formatVND(tong);
+        document.getElementById('nhacNhoHui').style.display = nhacNho?'block':'none';
+
+        let kh = document.getElementById('khungTongKetTungHui'); kh.innerHTML="";
+        if(!Object.keys(nhom).length) kh.innerHTML="<p style='color:var(--gray);text-align:center;'>Chưa có dữ liệu</p>";
+        else {
+            for(let k in nhom) {
+                let div=document.createElement('div'); div.className='settings-details'; div.style.marginBottom='12px';
+                div.innerHTML=`<div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.4);display:flex;justify-content:space-between;align-items:center;">
+                    <span style="display:flex;align-items:center;gap:8px;color:var(--blue);font-weight:800;font-size:14px;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5a7a9a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>
+                        ${nhom[k].ten}
+                    </span>
+                    <button class="btn-glass" style="padding:6px 12px;font-size:12px;" data-ten="${nhom[k].ten}" data-chuhui="${nhom[k].chuHui}" onclick="dienNhanhThongTin(this)">Điền</button>
+                </div>
+                <div style="padding:12px 16px;">
+                    <div class="settings-row" style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.3);">
+                        <span class="settings-row-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                        <span class="settings-row-label" style="font-size:12px;">Chủ hụi</span>
+                        <span style="font-size:13px;font-weight:800;color:var(--text-sub);">${nhom[k].chuHui}</span>
+                    </div>
+                    <div class="settings-row" style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.3);">
+                        <span class="settings-row-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+                        <span class="settings-row-label" style="font-size:12px;">Ngày bắt đầu</span>
+                        <span class="ngay-hien-thi" style="font-size:13px;">${dinhDangNgayVN(nhom[k].ngayBD)}</span>
+                    </div>
+                    <div class="settings-row" style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.3);">
+                        <span class="settings-row-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+                        <span class="settings-row-label" style="font-size:12px;">Đã đóng</span>
+                        <span style="font-size:13px;font-weight:800;color:var(--text);">${nhom[k].thang} tháng</span>
+                    </div>
+                    <div class="settings-row" style="padding:8px 0;border-bottom:none;background:rgba(26,127,255,0.04);">
+                        <span class="settings-row-icon" style="color:var(--blue);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+                        <span class="settings-row-label" style="font-size:12px;color:var(--blue);">Tổng chưng này</span>
+                        <span style="font-size:15px;font-weight:900;color:var(--blue);">${formatVND(nhom[k].tong)}</span>
+                    </div>
+                </div>`;
+                kh.appendChild(div);
+            }
+        }
+        hienThiDanhSachHui();
+    }
+
+    function hienThiDanhSachHui() {
+        let ul=document.getElementById('danhSachHui'); ul.innerHTML="";
+        let kTen=document.getElementById('timKiemTenHui').value.toLowerCase(), kNgay=document.getElementById('timKiemNgayHui').value;
+        let loc=lichSuHui.filter(i=>(!kTen||i.ten.toLowerCase().includes(kTen)||i.chuHui.toLowerCase().includes(kTen))&&(!kNgay||i.ngay===kNgay)).sort((a,b)=>new Date(b.ngay)-new Date(a.ngay));
+        let pages=Math.ceil(loc.length/SO_DONG_MOI_TRANG)||1;
+        if(trangHienTaiHui>pages) trangHienTaiHui=pages;
+        if(!loc.length) ul.innerHTML="<li style='justify-content:center;color:var(--gray);'>Không tìm thấy</li>";
+        else {
+            loc.slice((trangHienTaiHui-1)*SO_DONG_MOI_TRANG,trangHienTaiHui*SO_DONG_MOI_TRANG).forEach(i=>{
+                let li=document.createElement('li');
+                let ch=i.chuHui?`<br><small style="color:var(--gray);display:inline-flex;align-items:center;gap:3px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${i.chuHui}</small>`:'';
+                let am=i.ngayAm&&i.ngayAm.trim()?`<br><small style="color:var(--orange);font-weight:700;display:inline-flex;align-items:center;gap:3px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>Mùng ${i.ngayAm} âm</small>`:'';
+                li.innerHTML=`<span><strong>${i.ten}</strong>${ch}${am}<br><span class="ngay-hien-thi">${dinhDangNgayVN(i.ngay)}</span></span><span style="text-align:right;"><b>${formatVND(i.tien)}</b><button onclick="xoaHui(${lichSuHui.indexOf(i)})" class="btn-delete-small">Xóa</button></span>`;
+                ul.appendChild(li);
+            });
+        }
+        taoNutPhanTrang('phanTrangHui',pages,trangHienTaiHui,p=>{trangHienTaiHui=p;hienThiDanhSachHui();});
+    }
+    async function xoaHui(idx) { if(await tuTrinhConfirm("Chắc chắn xóa?")) { lichSuHui.splice(idx,1); dongBoLenMay(); taiDuLieuHui(); } }
+
+    // ===== THU-CHI =====
+    function capNhatGiaoDienDanhMuc() {
+        document.getElementById('selectThu').innerHTML = danhMucThu.map(d=>`<option value="${d}">${d}</option>`).join('');
+        document.getElementById('selectChi').innerHTML = danhMucChi.map(d=>`<option value="${d}">${d}</option>`).join('');
+    }
+    async function themDanhMuc(loai) {
+        let ten = await tuTrinhPrompt(`Nhập tên khoản ${loai==='thu'?'THU':'CHI'} mới:`);
+        if(ten) {
+            ten=ten.trim();
+            if(loai==='thu') { if(!danhMucThu.includes(ten)) danhMucThu.push(ten); document.getElementById('selectThu').value=ten; }
+            else { if(!danhMucChi.includes(ten)) danhMucChi.push(ten); document.getElementById('selectChi').value=ten; }
+            dongBoLenMay(); capNhatGiaoDienDanhMuc(); await tuTrinhAlert("Đã thêm!");
+        }
+    }
+    async function xoaDanhMuc(loai) {
+        let sel=document.getElementById(loai==='thu'?'selectThu':'selectChi').value;
+        if(!sel) return;
+        if(await tuTrinhConfirm(`Xóa khỏi danh sách: "${sel}"?`)) {
+            if(loai==='thu') danhMucThu=danhMucThu.filter(d=>d!==sel);
+            else danhMucChi=danhMucChi.filter(d=>d!==sel);
+            dongBoLenMay(); capNhatGiaoDienDanhMuc(); await tuTrinhAlert("Đã xóa!");
+        }
+    }
+    async function luuGiaoDich(loai) {
+        let ten=document.getElementById(loai==='thu'?'selectThu':'selectChi').value;
+        let tien=laySoTuInput(loai==='thu'?'tienThu':'tienChi');
+        let ngay=document.getElementById(loai==='thu'?'ngayThu':'ngayChi').value;
+        if(!ten||tien<=0||!ngay) return await tuTrinhAlert("Nhập đủ thông tin!");
+        lichSuThuChi.push({loai,ten,tien,ngay}); dongBoLenMay();
+        document.getElementById(loai==='thu'?'tienThu':'tienChi').value=""; trangHienTaiThuChi=1;
+        hienThiDanhSachThuChi(); await tuTrinhAlert("Đã lưu ☁️!");
+    }
+    function hienThiDanhSachThuChi() {
+        let ul=document.getElementById('danhSachThuChi'); ul.innerHTML="";
+        let kTen=document.getElementById('timKiemThuChi').value.toLowerCase(), kNgay=document.getElementById('timKiemNgayThuChi').value;
+        let loc=lichSuThuChi.filter(i=>{
+            let t=!kTen||i.ten.toLowerCase().includes(kTen);
+            let n=!kNgay||i.ngay===kNgay;
+            return t&&n;
+        });
+        let tThu=0,tChi=0;
+        loc.forEach(i=>{if(i.loai==='thu')tThu+=i.tien;else tChi+=i.tien;});
+        document.getElementById('hienTongThu').innerText=formatVND(tThu);
+        document.getElementById('hienTongChi').innerText=formatVND(tChi);
+        let soDu=tThu-tChi;
+        document.getElementById('hienSoDu').innerText=formatVND(soDu);
+        document.getElementById('hienSoDu').style.color=soDu<0?"var(--red)":"var(--blue)";
+        loc.sort((a,b)=>new Date(b.ngay)-new Date(a.ngay));
+        let pages=Math.ceil(loc.length/SO_DONG_MOI_TRANG)||1;
+        if(trangHienTaiThuChi>pages) trangHienTaiThuChi=pages;
+        if(!loc.length) ul.innerHTML="<li style='justify-content:center;color:var(--gray);'>Không tìm thấy</li>";
+        else {
+            loc.slice((trangHienTaiThuChi-1)*SO_DONG_MOI_TRANG,trangHienTaiThuChi*SO_DONG_MOI_TRANG).forEach(i=>{
+                let li=document.createElement('li');
+                let isThu=i.loai==='thu', color=isThu?"thu-nhap":"chi-phi";
+                li.innerHTML=`<span><strong class="${color}">${i.ten}</strong><br><span class="ngay-hien-thi">${dinhDangNgayVN(i.ngay)}</span></span><span style="text-align:right;" class="${color}"><b>${isThu?'+':'-'} ${formatVND(i.tien)}</b><button onclick="xoaThuChi(${lichSuThuChi.indexOf(i)})" class="btn-delete-small">Xóa</button></span>`;
+                ul.appendChild(li);
+            });
+        }
+        taoNutPhanTrang('phanTrangThuChi',pages,trangHienTaiThuChi,p=>{trangHienTaiThuChi=p;hienThiDanhSachThuChi();});
+    }
+    async function xoaThuChi(idx) { if(await tuTrinhConfirm("Chắc chắn xóa?")) { lichSuThuChi.splice(idx,1); dongBoLenMay(); hienThiDanhSachThuChi(); } }
+
+    // ===== GHI CHÚ =====
+    async function luuGhiChu() {
+        let tieuDe=document.getElementById('tieuDeGhiChu').value.trim();
+        let noiDung=document.getElementById('noiDungGhiChu').value.trim();
+        if(!tieuDe&&!noiDung) return await tuTrinhAlert("Chưa nhập nội dung!");
+        let ngaySua=new Date().toISOString();
+        if(viTriSuaGhiChu>-1) { danhSachGhiChuArr[viTriSuaGhiChu]={tieuDe,noiDung,ngaySua}; viTriSuaGhiChu=-1; }
+        else { danhSachGhiChuArr.unshift({tieuDe,noiDung,ngaySua}); }
+        dongBoLenMay();
+        document.getElementById('tieuDeGhiChu').value="";
+        document.getElementById('noiDungGhiChu').value="";
+        hienThiGhiChu(); await tuTrinhAlert("Đã lưu ghi chú ☁️!");
+    }
+    function hienThiGhiChu() {
+        let ul=document.getElementById('danhSachGhiChu'); ul.innerHTML="";
+        if(!danhSachGhiChuArr.length) { ul.innerHTML="<li style='justify-content:center;color:var(--gray);'>Chưa có ghi chú nào.</li>"; return; }
+        danhSachGhiChuArr.forEach((note,i)=>{
+            let li=document.createElement('li'); li.style.display='block';
+            let d=new Date(note.ngaySua);
+            let ds=d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit',year:'numeric'});
+            let dt=note.tieuDe?`<strong style="color:var(--text);font-size:15px;">${note.tieuDe}</strong><br>`:'';
+            li.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;"><div style="flex:1;cursor:pointer;" onclick="suaGhiChu(${i})">${dt}<div class="note-preview">${note.noiDung}</div><div class="note-date">Cập nhật: ${ds}</div></div><button onclick="xoaGhiChu(${i},event)" class="btn-delete-small" style="margin-left:12px;margin-top:4px;">Xóa</button></div>`;
+            ul.appendChild(li);
+        });
+    }
+    function suaGhiChu(i) {
+        let n=danhSachGhiChuArr[i];
+        document.getElementById('tieuDeGhiChu').value=n.tieuDe||"";
+        document.getElementById('noiDungGhiChu').value=n.noiDung||"";
+        viTriSuaGhiChu=i; window.scrollTo({top:0,behavior:'smooth'});
+        document.getElementById('noiDungGhiChu').focus();
+    }
+    async function xoaGhiChu(i,e) {
+        e.stopPropagation();
+        if(await tuTrinhConfirm("Xóa ghi chú này?")) {
+            danhSachGhiChuArr.splice(i,1); dongBoLenMay(); hienThiGhiChu();
+            if(viTriSuaGhiChu===i) { document.getElementById('tieuDeGhiChu').value=""; document.getElementById('noiDungGhiChu').value=""; viTriSuaGhiChu=-1; }
+        }
+    }
+
+    // ===== PAGINATION =====
+    function taoNutPhanTrang(id,tong,cur,cb) {
+        let c=document.getElementById(id); c.innerHTML="";
+        if(tong<=1) return;
+        for(let i=1;i<=tong;i++) {
+            let b=document.createElement('button');
+            b.className="page-btn"+(i===cur?" active":"");
+            b.innerText=i; b.onclick=()=>cb(i); c.appendChild(b);
+        }
+    }
+
+    // ===== DETAILS ANIMATION ENGINE =====
+    function initDetailsAnimation(detailsEl) {
+        const bodies = detailsEl.querySelectorAll('.settings-body, .glass-card-body, .rb-body');
+        bodies.forEach(body => {
+            // Đo chiều cao thực
+            const h = body.scrollHeight;
+            if (detailsEl.open) {
+                body.style.maxHeight = h + 'px';
+                body.classList.add('anim-open');
+                body.classList.remove('anim-closed');
+            } else {
+                body.style.maxHeight = '0px';
+                body.classList.add('anim-closed');
+                body.classList.remove('anim-open');
+            }
+        });
+    }
+
+                function attachDetailsAnimations() {
+        document.querySelectorAll('.settings-details, .glass-card-details, .result-box').forEach(det => {
+            // Chống trùng lặp sự kiện click khi hàm bị gọi lại nhiều lần
+            if (det.dataset.animated === 'true') return;
+            det.dataset.animated = 'true';
+
+            const summary = det.querySelector('summary');
+            const body = det.querySelector('.settings-body, .glass-card-body, .rb-body');
+            if (!summary || !body) return;
+
+            // Thiết lập trạng thái ban đầu khi vừa tải trang
+            if (det.open) {
+                body.style.maxHeight = 'none'; // Mở sẵn thì cho co giãn tự do luôn
+                body.classList.add('anim-open');
+                body.classList.remove('anim-closed');
+            } else {
+                body.style.maxHeight = '0px';
+                body.classList.add('anim-closed');
+                body.classList.remove('anim-open');
+            }
+
+            summary.addEventListener('click', function(e) {
+                e.preventDefault(); // Chặn hành vi nhảy giật mặc định của thẻ details
+
+                // Khóa tạm thời, không cho bấm liên tục khi hiệu ứng đang chạy để tránh lỗi loạn nhịp
+                if (body.dataset.transitioning === 'true') return;
+                body.dataset.transitioning = 'true';
+
+                if (!det.open) {
+                    // 🔓 HÀNH ĐỘNG MỞ KHUNG
+                    det.open = true;
+                    body.classList.remove('anim-closed');
+                    body.style.maxHeight = '0px';
+                    body.offsetHeight; // Ép trình duyệt làm tươi giao diện (Reflow)
+                    
+                    body.style.maxHeight = body.scrollHeight + 'px';
+                    body.classList.add('anim-open');
+
+                    // SAU KHI MỞ XONG (350ms): Giải phóng chiều cao về 'none' để gõ nhập số liệu không bị cấn
+                    setTimeout(() => {
+                        if (det.open) {
+                            body.style.maxHeight = 'none';
+                        }
+                        body.dataset.transitioning = 'false';
+                    }, 350);
+                } else {
+                    // 🔒 HÀNH ĐỘNG ĐÓNG KHUNG
+                    // Trước khi đóng, đo chính xác chiều cao thực tế hiện tại thay vì dùng số cũ
+                    body.style.maxHeight = body.scrollHeight + 'px';
+                    body.offsetHeight; // Ép làm tươi giao diện
+                    
+                    // Tiến hành lướt mượt về 0px
+                    body.style.maxHeight = '0px';
+                    body.classList.remove('anim-open');
+                    body.classList.add('anim-closed');
+                    
+                    // Đợi hiệu ứng lướt cuộn lên hoàn tất hoàn toàn rồi mới sập hẳn thẻ details xuống
+                    setTimeout(() => {
+                        if (body.classList.contains('anim-closed')) {
+                            det.open = false;
+                        }
+                        body.dataset.transitioning = 'false';
+                    }, 350);
+                }
+            });
+        });
+    }
+
+    // Gắn sau khi DOM sẵn sàng
+        // Gắn sau khi DOM sẵn sàng và kích hoạt lời chào thông minh ngay lập tức
+    document.addEventListener('DOMContentLoaded', () => {
+        capNhatLoiChao(); // Gọi lệnh tự động tính toán buổi trong ngày
+        setTimeout(attachDetailsAnimations, 80);
+    });
+    // Cũng gắn lại sau khi đăng nhập xong (main-app hiện ra)
+    const _origShowMainApp = window.showMainApp;
+    document.addEventListener('mainAppReady', attachDetailsAnimations);
+        // ===== THUẬT TOÁN ĐIỀU PHỐI TIÊU ĐỀ THEO CUỘN VÀ CHẶN LỖI LỆCH TAB =====
+    function capNhatTieuDeTheoCuon() {
+        const hopTruotHeader = document.getElementById('headerSlideBox');
+        if (!hopTruotHeader) return;
+        
+        const tabLuong = document.getElementById('tab-luong');
+        // KIỂM TRA ĐIỀU KIỆN CHỐT: Chỉ xử lý hiện tiền nếu ứng dụng đang mở ĐÚNG "Tab Lương"
+        if (tabLuong && tabLuong.classList.contains('active')) {
+            const cardXanh = document.querySelector('.rb-header');
+            if (cardXanh) {
+                const cardBottom = cardXanh.getBoundingClientRect().bottom;
+                // Nếu cuộn khuất Card xanh quá vùng Header (60px) thì trượt hiện tiền lương
+                if (cardBottom < 60) {
+                    hopTruotHeader.classList.add('show-salary');
+                } else {
+                    hopTruotHeader.classList.remove('show-salary');
+                }
+            }
+        } else {
+            // Nếu người dùng đang ở tab Hụi, Thu-Chi hoặc Ghi Chú -> ÉP trả về chữ TÚ TRINH NGUYỄN 100%
+            hopTruotHeader.classList.remove('show-salary');
+        }
+    }
+
+    // Kích hoạt mắt thần theo dõi vị trí cuộn trang vô hạn
+    window.addEventListener('scroll', capNhatTieuDeTheoCuon, { passive: true });
+       
+           // ===== HÀM TỰ ĐỘNG ĐỔI LỜI CHÀO THEO THỜI GIAN THỰC =====
+    function capNhatLoiChao() {
+        const el = document.getElementById('loiChaoSubtitle');
+        if (!el) return;
+        
+        // Lấy số giờ hiện tại trên hệ thống điện thoại
+        const gio = new Date().getHours();
+        let buoi = "tối"; // Mặc định nếu là đêm hoặc tối
+        
+        if (gio >= 5 && gio < 11) {
+            buoi = "sáng";
+        } else if (gio >= 11 && gio < 14) {
+            buoi = "trưa";
+        } else if (gio >= 14 && gio < 18) {
+            buoi = "chiều";
+        } else {
+            buoi = "tối";
+        }
+        
+        // Ép chữ mới tự động cập nhật
+        el.innerText = `Chúc Tú Trinh, buổi ${buoi} vui vẻ!`;
+    }
+    
+      
+             
+// ===== HỆ THỐNG TRỢ LÝ AI ĐỘC QUYỀN TRUY VẤN - PHONG CÁCH CHIBI GEMINI =====
+    const ico = {
+        sparkle: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 5px; color:#1a7fff;"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>`,
+        empty:   `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 5px; color:var(--gray);"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>`,
+        chart:   `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 5px; color:var(--blue);"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+        money:   `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 5px; color:#28a745;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>`,
+        trend:   `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 5px; color:#1a7fff;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`,
+        search:  `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 5px; color:var(--blue);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+        note:    `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 5px; color:#ff9f0a;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+        pin:     `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px; color:#ff3b30;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+        dot:     `<svg width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px; margin-left: 4px; color:var(--gray);"><circle cx="12" cy="12" r="10"/></svg>`
+    };
+   
+        function toggleKhungChatAI() {
+        const win = document.getElementById('khungCuaSoAI');
+        const btn = document.getElementById('nutBongBongAI');
+        const backdrop = document.getElementById('aiChatBackdrop');
+        
+        if(win) {
+            win.classList.toggle('show');
+            if(btn) btn.classList.toggle('active-chat'); 
+            
+            // MẮT THẦN KIỂM SOÁT TOÀN DIỆN TRẠNG THÁI HIỂN THỊ
+            if(win.classList.contains('show')) {
+                // 1. Nếu khung chat mở: Ép body khóa cuộn + Buông màn kính mờ che trang dưới
+                document.body.classList.add('ai-chat-open');
+                if(backdrop) backdrop.classList.add('show');
+                
+                const vungMsg = document.getElementById('vungTinNhanhAI');
+                if(vungMsg) vungMsg.scrollTop = vungMsg.scrollHeight;
+                setTimeout(() => { const inp = document.getElementById('oNhapTinNhanhAI'); if(inp) inp.focus(); }, 300);
+            } else {
+                // 2. Nếu khung chat đóng: Giải phóng body cho cuộn lại + Thu hồi màn mờ
+                document.body.classList.remove('ai-chat-open');
+                if(backdrop) backdrop.classList.remove('show');
+            }
+        }
+    }
+
+    function guiTinNhanhAI() {
+        const oInp = document.getElementById('oNhapTinNhanhAI');
+        const vungMsg = document.getElementById('vungTinNhanhAI');
+        if(!oInp || !vungMsg || !oInp.value.trim()) return;
+
+        let cauHoi = oInp.value.trim();
+        oInp.value = ""; 
+
+        let divUser = document.createElement('div');
+        divUser.className = "ai-msg user";
+        divUser.innerText = cauHoi;
+        vungMsg.appendChild(divUser);
+        vungMsg.scrollTop = vungMsg.scrollHeight;
+
+        let cauTraLoiAI = phanTichVaTruyVanDuLieu(cauHoi.toLowerCase());
+
+        setTimeout(() => {
+            let divBot = document.createElement('div');
+            divBot.className = "ai-msg bot";
+            divBot.innerHTML = cauTraLoiAI;
+            vungMsg.appendChild(divBot);
+            vungMsg.scrollTop = vungMsg.scrollHeight;
+        }, 350);
+    }
+
+    function phanTichVaTruyVanDuLieu(text) {
+        let n = new Date();
+        let namNay = n.getFullYear(); 
+        let thangNaySo = n.getMonth() + 1;
+        let thangTruocSo = thangNaySo === 1 ? 12 : thangNaySo - 1;
+        let namTruocSo = thangNaySo === 1 ? namNay - 1 : namNay;
+
+        let chuoiThangNay = namNay + '-' + String(thangNaySo).padStart(2, '0');
+        let chuoiThangTruoc = namTruocSo + '-' + String(thangTruocSo).padStart(2, '0');
+
+        let checkThang = chuoiThangNay; 
+        let nhanThang = `tháng ${thangNaySo}/${namNay}`;
+
+        if (text.includes("tháng trước") || text.includes("tháng rồi") || text.includes("tháng ngoái")) {
+            checkThang = chuoiThangTruoc;
+            nhanThang = `tháng trước (${thangTruocSo}/${namTruocSo})`;
+        }
+
+        // Tính toán nhanh buổi trong ngày để câu chào thật tự nhiên
+        let gioHT = n.getHours();
+        let buoiHT = "tối";
+        if (gioHT >= 5 && gioHT < 11) buoiHT = "sáng";
+        else if (gioHT >= 11 && gioHT < 14) buoiHT = "trưa";
+        else if (gioHT >= 14 && gioHT < 18) buoiHT = "chiều";
+
+        // Làm sạch câu chữ để kiểm tra lời chào
+        let cauHoiClean = text.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()!?]/g,"");
+        const danhSachTuChao = ["hi", "hello", "chào", "chao", "alo", "hey", "ê", "ơi", "oi"];
+        let laLoiChao = danhSachTuChao.some(tc => cauHoiClean === tc || cauHoiClean.startsWith(tc + " "));
+
+        if (laLoiChao) {
+            return `${ico.sparkle} <b>Chào Tú Trinh xinh đẹp! Chúc Trinh một buổi ${buoiHT} thật vui vẻ và ngập tràn năng lượng nhé!</b><br><br>
+                    🤖 Mình đã sẵn sàng chuyên tìm kiếm sổ sách và tính toán phụ Trinh rồi đây. Trinh muốn mình rà soát mục nào hôm nay nè:<br><br>
+                    ${ico.money} Kiểm tra <b>Tiền Lương & Giờ tăng ca</b><br>
+                    ${ico.chart} Xem <b>Lịch sử đóng Hụi</b> các dây<br>
+                    ${ico.trend} Tổng kết ví <b>Thu - Chi / Chi tiêu</b><br>
+                    ${ico.note} Tìm kiếm nội dung các <b>Ghi chú</b>`;
+        }
+
+        if (text.includes("hụi") || text.includes("đóng hụi")) {
+            if (lichSuHui.length === 0) return `${ico.empty} Dữ liệu lịch sử đóng Hụi hiện tại đang trống Trinh ơi!`;
+            let tenCanTim = "";
+            let danhSachTenDocQuyen = new Set();
+            lichSuHui.forEach(i => {
+                if(i.ten) danhSachTenDocQuyen.add(i.ten.toLowerCase());
+                if(i.chuHui) danhSachTenDocQuyen.add(i.chuHui.toLowerCase());
+            });
+            for (let name of danhSachTenDocQuyen) { if (text.includes(name)) { tenCanTim = name; break; } }
+
+            let danhSachLoc = lichSuHui.filter(i => {
+                let khopThang = i.ngay && i.ngay.substring(0, 7) === checkThang;
+                let khopTen = !tenCanTim || (i.ten && i.ten.toLowerCase().includes(tenCanTim)) || (i.chuHui && i.chuHui.toLowerCase().includes(tenCanTim));
+                return khopThang && khopTen;
+            });
+            let tongTienHuiLoc = danhSachLoc.reduce((sum, item) => sum + item.tien, 0);
+            if (danhSachLoc.length === 0) return `${ico.chart} Trong dữ liệu <b>${nhanThang}</b>, mình không tìm thấy lượt đóng hụi nào${tenCanTim ? ` cho <b>"${tenCanTim.toUpperCase()}"</b>` : ''} cả Trinh nhé.`;
+
+            let chiTietTraVoi = `${ico.money} Tổng cộng tiền hụi đã đóng trong <b>${nhanThang}</b>${tenCanTim ? ` cho <b>"${tenCanTim.toUpperCase()}"</b>` : ''} là: <b style="color:#28a745;">${formatVND(tongTienHuiLoc)}</b><br><br>${ico.chart} <b>Chi tiết danh sách đóng:</b>`;
+            danhSachLoc.forEach((item, index) => { chiTietTraVoi += `<br>${ico.dot} Lượt ${index+1}: Đóng dây <b>${item.ten}</b> số tiền <b>${formatVND(item.tien)}</b> ngày ${dinhDangNgayVN(item.ngay)}`; });
+            return chiTietTraVoi;
+        }
+
+        if (text.includes("lương") || text.includes("tăng ca") || text.includes("thực lãnh") || text.includes("lảnh")) {
+            let luongCoBan = laySoTuInput('luongCoBan') || 5660000;
+            let phuCap = laySoTuInput('phuCapInput') || 0;
+            let caDem = document.getElementById('soNgayCaDem') ? Number(document.getElementById('soNgayCaDem').value) : 0;
+            let otNhanh = document.getElementById('soGioOTNhanh') ? Number(document.getElementById('soGioOTNhanh').value) : 0;
+            let listOTHours = lichSuOT.filter(i => i.thang === chuoiThangNay).reduce((t,i)=>t+i.gio, 0);
+            let tongOT = (listOTHours + otNhanh) * (luongCoBan / 24 / 8 * 1.5);
+            let phuCapCD = (luongCoBan / 24) * 0.5 * caDem;
+            let gioCN = document.getElementById('gioCN') ? Number(document.getElementById('gioCN').value) : 0;
+            let ngayCN = document.getElementById('ngayCN') ? Number(document.getElementById('ngayCN').value) : 0;
+            let tongCN = (gioCN * (luongCoBan / 24 / 8 * 2)) + (ngayCN * (200000 / 24));
+            let bh = (luongCoBan * 0.105) + 25500;
+            let thucLanhHT = luongCoBan - bh + tongOT + phuCapCD + phuCap + tongCN;
+
+            if (text.includes("tháng trước") || text.includes("tháng rồi")) return `${ico.money} Dữ liệu lương trên màn hình tập trung cho tháng hiện hành. Để xem tháng cũ bạn mở bảng <b>"Xóa & Xem tháng cũ"</b> nha!`;
+            return `${ico.money} <b>Báo cáo tổng kết tiền Lương ${nhanThang}:</b><br><br>
+                    ${ico.dot} Lương cơ bản: <b>${formatVND(luongCoBan)}</b><br>
+                    ${ico.dot} Tăng ca thường: <b>${formatVND(tongOT)}</b> (${listOTHours + otNhanh} giờ)<br>
+                    ${ico.dot} Phụ cấp ca đêm: <b>${formatVND(phuCapCD)}</b> (${caDem} ngày)<br>
+                    ${ico.dot} Tăng ca Chủ Nhật: <b>${formatVND(tongCN)}</b><br>
+                    ${ico.dot} Khấu trừ bảo hiểm: <span style="color:#ff3b30;">-${formatVND(bh)}</span><br><br>
+                    ${ico.trend} Dự kiến Thực lãnh: <b style="color:#0057d9; font-size:14px;">${formatVND(thucLanhHT)}</b>`;
+        }
+
+        if (text.includes("chi") || text.includes("tiêu") || text.includes("thu chi") || text.includes("xài")) {
+            let locTC = lichSuThuChi.filter(i => i.ngay && i.ngay.substring(0, 7) === checkThang);
+            let tThu = 0, tChi = 0;
+            locTC.forEach(i => { if(i.loai==='thu') tThu+=i.tien; else tChi+=i.tien; });
+            return `${ico.chart} <b>Thống kê số liệu Thu - Chi trong ${nhanThang}:</b><br><br>
+                    <span style="color:#28a745; font-weight:700;">+</span> Tiền thu vào: <b>${formatVND(tThu)}</b><br>
+                    <span style="color:#ff3b30; font-weight:700;">-</span> Tiền chi ra: <b>${formatVND(tChi)}</b><br>
+                    ${ico.dot} Số dư ví còn lại: <b style="color:${(tThu - tChi) < 0 ? '#ff3b30' : '#0057d9'};">${formatVND(tThu - tChi)}</b>`;
+        }
+
+        if (text.includes("ghi chú") || text.includes("ghichu") || text.includes("note") || text.includes("lưu")) {
+            if (danhSachGhiChuArr.length === 0) return `${ico.note} Bạn chưa lưu ghi chú nào trong danh sách hết Trinh ơi!`;
+            
+            let tuKhoaTim = text.replace("ghi chú", "").replace("ghichu", "").replace("note", "").replace("lưu", "").replace("xem", "").replace("tìm", "").trim();
+            let danhSachLoc = danhSachGhiChuArr;
+            
+            if (tuKhoaTim.length > 1) {
+                danhSachLoc = danhSachGhiChuArr.filter(i => 
+                    (i.tieuDe && i.tieuDe.toLowerCase().includes(tuKhoaTim)) || 
+                    (i.noiDung && i.noiDung.toLowerCase().includes(tuKhoaTim))
+                );
+            }
+            if (danhSachLoc.length === 0) return `${ico.search} Mình tìm kiếm nhưng không thấy ghi chú nào chứa từ khóa <b>"${tuKhoaTim}"</b> hết Trinh ơi.`;
+            
+            let chiTietTraVoi = tuKhoaTim.length > 1 ? `${ico.search} <b>Kết quả tìm ghi chú cho từ "${tuKhoaTim}":</b>` : `${ico.note} <b>Top 5 ghi chú mới cập nhật:</b>`;
+            
+            danhSachLoc.slice(0, 5).forEach((note, index) => {
+                let d = new Date(note.ngaySua);
+                let ds = d.toLocaleDateString('vi-VN', {day:'2-digit', month:'2-digit'});
+                let td = note.tieuDe ? `<b>${note.tieuDe}</b>: ` : ``;
+                chiTietTraVoi += `<br><br>${ico.pin} ${td}${note.noiDung} <small style="color:var(--gray);">(${ds})</small>`;
+            });
+            if (danhSachLoc.length > 5) chiTietTraVoi += `<br><br><i>... và còn ${danhSachLoc.length - 5} ghi chú khác, bạn qua tab Ghi Chú để xem nhé!</i>`;
+            return chiTietTraVoi;
+        }
+
+        return `${ico.sparkle} Mình chưa hiểu rõ ý Trinh lắm. Hãy thử đặt các câu hỏi truy vấn như:<br><br>
+                ${ico.dot} <i>"tiền hụi tháng này đóng bao nhiêu"</i><br>
+                ${ico.dot} <i>"tháng rồi đóng hụi cho bà gì sso bao nhiêu"</i><br>
+                ${ico.dot} <i>"kiểm tra tổng tiền lương tháng này"</i><br>
+                ${ico.dot} <i>"tìm ghi chú tiền chợ"</i>`;
+    }
+
+    // Tự động đồng bộ câu chữ bong bóng lời thoại thò thụt theo buổi thời gian thực
+    function capNhatLoiChaoMascot() {
+        const el = document.getElementById('aiWelcomeBubbleText');
+        if(!el) return;
+        const gio = new Date().getHours();
+        let buoi = "tối";
+        if (gio >= 5 && gio < 11) buoi = "sáng";
+        else if (gio >= 11 && gio < 14) buoi = "trưa";
+        else if (gio >= 14 && gio < 18) buoi = "chiều";
+        el.innerHTML = `Chào buổi ${buoi} Tú Trinh!`;
+    }
+
+    // Kích hoạt lời chào mascot sau khi app tải xong dữ liệu nền
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(capNhatLoiChaoMascot, 150);
+    });    
+       
+        // ===== HỆ THỐNG CẢM BIẾN HÀNH VI AI NGỮ CẢNH NGẪU NHIÊN & CHỐNG TRÀN BIÊN CHỮ =====
+    let aiBubbleTimeout = null; // Cầu chì thời gian kiểm soát tối cao, triệt tiêu lỗi mất chữ ở ô Hụi
+
+    function layCauNoiAITheoNguCảnh(id, value) {
+        if (!value.trim()) {
+            // KHO CÂU THOẠI NGẪU NHIÊN KHI Ô NHẬP ĐANG TRỐNG RỖNG (MỖI LẦN BẤM VÀO ĐỔI CÂU KHÁC)
+            const mucTrongNgauNhien = {
+                'luongCoBan': [
+                    "Trinh đang nhập Lương cơ bản đúng không? Gõ số vào xem sao nè! 💸",
+                    "Thu nhập cứng tháng này của Trinh là bao nhiêu gõ vô mình tính nha! 🏦",
+                    "Lương cứng cày cuốc mỗi tháng nằm ở ô này nè Tú Trinh ơi! 💎"
+                ],
+                'soGioOTNhanh': [
+                    "Hôm nay Trinh có tăng ca thêm tiếng nào không ta? Nhập vô liền! ⏰",
+                    "Ô tăng ca thường đây rồi! Hôm nay cày cuốc được mấy tiếng vậy Trinh? 🔥",
+                    "Có giờ tăng ca nào hôm nay hông Trinh ơi, mình gom tiền lương giúp nè! 💸"
+                ],
+                'soNgayCaDem': [
+                    "Tháng này Trinh có phải cày ca đêm hôm nào chưa nè? 🌌",
+                    "Ô nhập ca đêm hôm thức trắng đây rồi, Trinh gõ số vào xem sao! 🐼",
+                    "Có ngày cày đêm vất vả nào tháng này không Trinh gõ vào đây nhé! 🌙"
+                ],
+                'phuCapInput': [
+                    "Có khoản phụ cấp độc quyền nào tháng này không Trinh ơi? ✨",
+                    "Khoản trợ cấp hay tiền thưởng thêm nằm ở ô này nè Trinh! 🎁",
+                    "Trinh có được thưởng thêm khoản tiền nào hông, gõ vào đây nha! 💵"
+                ],
+                'gioCN': [
+                    "Trinh cày tăng ca ngày Chủ Nhật thì nhập ở đây nha! 👑",
+                    "Tăng ca ngày nghỉ Chủ Nhật được mấy tiếng rồi Trinh ơi? 🚀",
+                    "Có giờ làm ngày Chủ Nhật nào không gõ vô mình nhân đôi lương nha! 💰"
+                ],
+                'tenDuyHui': [
+                    "Dây hụi này Trinh đặt tên là gì cho dễ nhớ nè? 📝",
+                    "Gõ tên dây hụi phong thủy vào đây đi Tú Trinh ơi! 📊",
+                    "Trinh đang mở dây hụi tên gì đó, bật mí cho mình biết với! 🤫"
+                ],
+                'tienHui': [
+                    "Đóng một lượt bao nhiêu tiền hụi vậy Trinh ơi? 💰",
+                    "Mỗi kỳ đóng hụi hết bao nhiêu tiền Trinh gõ vô đây nha! 🏦",
+                    "Số tiền góp hụi định kỳ nằm ở ô này nè Trinh! 💸"
+                ],
+                'chuHui': [
+                    "Ai là người cầm cái dây hụi này thế Trinh? Có uy tín hông? 🤫",
+                    "Trinh giao tiền hụi cho ai cầm cán gõ tên họ vô đây nè! 🔒",
+                    "Chủ hụi tên gì đó Trinh, gõ vô để mình lập sổ theo dõi nha! 👁️"
+                ],
+                'soTienThuChi': [
+                    "Khoản thu chi này hết bao nhiêu tiền vậy Trinh? 💸",
+                    "Ví tiền biến động bao nhiêu gõ số vào mình trừ số dư nha! 🛒",
+                    "Trinh chi ra hay thu vào bao nhiêu tiền nằm ở ô này nè! 🏦"
+                ],
+                'noiDungGhiChu': [
+                    "Trinh đang muốn lưu lại note bí mật gì đó phải không? 🤐",
+                    "Có việc gì quan trọng cần note lại Trinh gõ vào đây nha! 📝",
+                    "Ghi chú vạn năng, Trinh muốn lưu nhớ chuyện gì nè? 💡"
+                ]
+            };
+            
+            let mangCau = mucTrongNgauNhien[id] || ["Trinh đang chạm vào ô này đúng hông? Mình nhìn thấy nè! 👀"];
+            return mangCau[Math.floor(Math.random() * mangCau.length)];
+        }
+
+        let soTienFormat = isNaN(value) ? value : formatVND(Number(value));
+
+        // KHO CÂU THOẠI ĐỘNG THÔNG MINH KHI ĐÃ CÓ SỐ LIỆU (TỰ ĐỘNG ĐỊNH DẠNG VND ĐỌC VÀO)
+        if (id === 'luongCoBan') {
+            const cauLuong = [
+                `Lương gốc tận <b>${soTienFormat}</b> lận á! Trinh xuất sắc quá, ráng cày nha! 💪`,
+                `Thu nhập cứng <b>${soTienFormat}</b> ổn áp quá Trinh ơi, sắm đồ thôi nào! 💎`,
+                `Mức lương cơ bản vững vàng <b>${soTienFormat}</b>. Động lực đi làm đây rồi Trinh! 🚀`
+            ];
+            return cauLuong[Math.floor(Math.random() * cauLuong.length)];
+        }
+        if (id === 'soGioOTNhanh') {
+            const cauOT = [
+                `Trinh hôm nay cày thêm <b>${value} giờ</b> tăng ca hả? Giỏi quá mà chắc mệt lắm, nghỉ tay uống nước nha! 🥤`,
+                `Thêm <b>${value} tiếng</b> OT tăng thu nhập nè! Trinh chăm chỉ thế này ai làm lại nữa! 🔥`,
+                `Tăng ca miệt mài <b>${value} giờ</b>. Cuối tháng lãnh lúa rủng rỉnh nha Trinh! 💸`
+            ];
+            return cauOT[Math.floor(Math.random() * cauOT.length)];
+        }
+        if (id === 'soNgayCaDem') {
+            const cauDem = [
+                `Tận <b>${value} ngày</b> cày đêm thức trắng lận sao! Trinh ráng giữ sức khỏe, quầng thâm mắt kìa Trinh ơi! 🐼`,
+                `Cày đêm liên tục <b>${value} buổi</b> vất vả quá. Nhớ ăn uống bồi bổ nha Tú Trinh xinh đẹp! 🌌`,
+                `Đêm hôm cày cuốc <b>${value} ngày</b> mệt lắm đúng không? Thương Trinh ghê, cố lên nè! ❤️`
+            ];
+            return cauDem[Math.floor(Math.random() * cauDem.length)];
+        }
+        if (id === 'tenDuyHui') {
+            return `Dây hụi tên <b>"${value.toUpperCase()}"</b> nghe có vẻ phong thủy và may mắn lắm nè Trinh! 📊`;
+        }
+        if (id === 'tienHui') {
+            return `Đóng hụi một phát <b>${soTienFormat}</b> luôn! Gom cục tiền này cuối năm tha hồ sắm sửa nha Trinh! 🛍️`;
+        }
+        if (id === 'chuHui') {
+            return `Chủ hụi là <b>${value}</b> đúng không? Nhớ đòi tiền đúng ngày nha Trinh, hông cho ai quỵt đâu á! 🤫`;
+        }
+        if (id === 'soTienThuChi') {
+            return `Số tiền <b>${soTienFormat}</b> lận á! Tiền vào như nước hay ví đang chuẩn bị xẹp đây Trinh ơi? 💸`;
+        }
+        if (id === 'noiDungGhiChu') {
+            return `Ghi chú: <i>"${value}"</i>. Mình khóa bảo mật két sắt rồi, hông có ai đọc lén được note đâu! 🔒`;
+        }
+
+        return `Trinh đang nhập: <b>"${value}"</b> đúng không nè? Số liệu nhập vào rất chuẩn xác luôn! ✨`;
+    }
+
+    function dieuPhoiBongBongAI(element, noiDungText) {
+        const bubble = document.getElementById('aiContextBubble');
+        if (!bubble || !element) return;
+
+        // ⚡ BẺ GÃY HÀNG ĐỢI: Xóa sạch lệnh ẩn chữ của ô nhập cũ ngay lập tức, triệt tiêu lỗi mất chữ ở tab Hụi
+        clearTimeout(aiBubbleTimeout);
+
+        bubble.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="color:#1a7fff; flex-shrink:0;"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> <span>${noiDungText}</span>`;
+        
+        const rect = element.getBoundingClientRect();
+        const vungCuonTop = window.scrollY || document.documentElement.scrollTop;
+        const viTriTop = rect.top + vungCuonTop - 38;
+        
+        // 🚀 THUẬT TOÁN LẬT BIÊN HÌNH HỌC: Chống dồn cục chữ ở tab Ghi Chú ngoài cùng bên phải
+        if (rect.left + 230 > window.innerWidth) {
+            // Nếu phần tử nằm quá sát biên phải màn hình di động -> Ép khung thoại giãn nở lùi sang bên trái
+            bubble.style.left = "auto";
+            bubble.style.right = (window.innerWidth - rect.right + 5) + "px";
+            // Đẩy cái đuôi nhọn pointer chạy về góc bên phải để chỉ đúng tâm ô nhập liệu
+            bubble.style.setProperty('--arrow-left', 'auto');
+            bubble.style.setProperty('--arrow-right', '20px');
+        } else {
+            // Trạng thái thông thường ở các tab bên trái hoặc giữa màn hình
+            bubble.style.left = `${rect.left + 5}px`;
+            bubble.style.right = "auto";
+            bubble.style.setProperty('--arrow-left', '20px');
+            bubble.style.setProperty('--arrow-right', 'auto');
+        }
+
+        bubble.style.top = `${viTriTop}px`;
+        bubble.classList.add('show');
+    }
+
+    function anBongBongAI() {
+        const bubble = document.getElementById('aiContextBubble');
+        if (bubble) bubble.classList.remove('show');
+    }
+
+        // ===== SỬA LỖI HẸN GIỜ: TỰ ĐỘNG TẮT CHỮ SAU 3 GIÂY KHI CHUYỂN TAB VÀ GIỮ NGUYÊN Ô NHẬP =====
+    const _gocChuyenTab = chuyenTab;
+    chuyenTab = function(tabId, btnEl) {
+        _gocChuyenTab(tabId, btnEl);
+        
+        if (btnEl) {
+            clearTimeout(aiBubbleTimeout); // Xóa sạch mọi bộ đếm cũ ngay giây phút bấm đổi tab
+            
+            const loiChaoTabNgauNhien = {
+                'tab-luong': [
+                    "Hôm nay công việc của Trinh thế nào? Tăng ca có mệt lắm không nè? 🥤",
+                    "Bảng lương tháng này nhảy số siêu đẹp rồi kìa Trinh ơi! Vào xem thử đi! 📈",
+                    "Lương bổng rạch ròi, Trinh vào kiểm tra thành quả cày cuốc tháng này đi nè! 💸"
+                ],
+                'tab-hui': [
+                    "Hôm nay Trinh có hốt hụi hay đóng thêm dây hụi mới nào hông ta? 📊",
+                    "Sổ hụi của Trinh đây rồi! Hôm nay đóng hụi cho ai hay gom tiền về túi nè? 💰",
+                    "Rà soát lại các dây hụi thôi Trinh ơi, tiền nong phải rõ ràng nha! 🤫"
+                ],
+                'tab-thuchi': [
+                    "Ví thu chi hôm nay có biến động gì lớn hông Trinh, mua sắm gì chưa? 🛍️",
+                    "Hôm nay Trinh có khoản thu khổng lồ nào hay vừa chốt đơn món gì à? 🛒",
+                    "Cập nhật ví chi tiêu đều đặn nha Trinh, cuối tháng không sợ thâm hụt nè! 🏦"
+                ],
+                'tab-ghichu': [
+                    "Trinh muốn ghi nhớ việc gì quan trọng à? Lưu hết vào đây nha! 📝",
+                    "Khu vực lưu note bí mật của Trinh đây rồi! Viết gì vào đây đi nè! 🔒",
+                    "Ghi chú vạn năng, việc gì cần nhớ Trinh cứ gõ hết vào đây cho mình! 💡"
+                ]
+            };
+            
+            let mangCauNoi = loiChaoTabNgauNhien[tabId] || ["Tú Trinh vừa chuyển sang tab mới nè! ✨"];
+            let cauNoi = mangCauNoi[Math.floor(Math.random() * mangCauNoi.length)];
+            
+            // Chạy lệnh hiển thị bong bóng thoại lên màn hình trước
+            setTimeout(() => { 
+                dieuPhoiBongBongAI(btnEl, cauNoi); 
+                
+                // 🔥 ĐẶT LỆNH TỰ HỦY ĐỘC QUYỀN CHO TAB: Đúng 3 giây (3000ms) sau khi hiện, chữ thoại sẽ tự tắt biến mất!
+                aiBubbleTimeout = setTimeout(anBongBongAI, 3000);
+            }, 60);
+        }
+    };
+
+    // ĐỒNG BỘ MẮT THẦN LẮNG NGHE Focus/Input TOÀN APP (HÀNH VI Ô NHẬP GIỮ NGUYÊN THEO Ý TRINH)
+    document.addEventListener('DOMContentLoaded', () => {
+        const vungNhapLieu = document.querySelectorAll('input, textarea, select');
+        vungNhapLieu.forEach(oNhap => {
+            // Khi Trinh chạm vào bất kỳ ô nhập liệu nào -> Hiện chữ AI và giữ nguyên không tự tắt
+            oNhap.addEventListener('focus', (e) => {
+                let cauNoi = layCauNoiAITheoNguCảnh(e.target.id, e.target.value);
+                dieuPhoiBongBongAI(e.target, cauNoi);
+            });
+            oNhap.addEventListener('input', (e) => {
+                let cauNoi = layCauNoiAITheoNguCảnh(e.target.id, e.target.value);
+                dieuPhoiBongBongAI(e.target, cauNoi);
+            });
+            // Nào Trinh bấm ra ngoài ô nhập (Blur) -> Chữ AI mới lập tức biến tắt đi sau 180ms
+            oNhap.addEventListener('blur', () => {
+                aiBubbleTimeout = setTimeout(anBongBongAI, 180);
+            });
+        });
+    });
+    
+     // ===== BỘ NÃO ĐỒNG HỒ SINH HỌC: TỰ ĐỘNG BẬT THÔNG BÁO CHÀO TÚ TRINH THEO GIỜ THỰC =====
+    function kichHoatThongBaoTheoGio() {
+        const overlay = document.getElementById('welcomeOverlay');
+        const bTitle = document.getElementById('welcomeBoardTitle');
+        const bText = document.getElementById('welcomeBoardText');
+        if(!overlay || !bTitle || !bText) return;
+
+        const n = new Date();
+        const gio = n.getHours();
+        const phut = String(n.getMinutes()).padStart(2, '0');
+        const gioThat = `${gio}:${phut}`; // Lấy thời gian thật trên điện thoại, ví dụ: 21:05 hoặc 19:30
+
+        let tieuDe = "";
+        let noiDung = "";
+
+        if (gio >= 5 && gio < 11) {
+            tieuDe = "☀️ CHÀO BUỔI SÁNG NĂNG LƯỢNG!";
+            noiDung = `Chào Tú Trinh tràn đầy năng lượng! ✨ Hôm nay đi làm sớm vậy nè (${gioThat}), chúc Trinh một ngày làm việc thật vui vẻ, chấm công suôn sẻ và gặp nhiều may mắn nha! Cố lên Trinh ơi! 💪`;
+        } else if (gio >= 11 && gio < 14) {
+            tieuDe = "🍱 ĐẾN GIỜ NGHỈ TRƯA RỒI!";
+            noiDung = `Tú Trinh ơi đến giờ nghỉ trưa rồi nè (${gioThat})! 🍱 Trinh đã ăn cơm trưa ngon miệng chưa? Trưa nắng nóng nghỉ ngơi tí xíu, uống ly trà sữa cho mát rồi chiều cày tiếp nha Trinh! 🥤`;
+        } else if (gio >= 14 && gio < 18) {
+            tieuDe = "🌇 CHIỀU RỒI, RÀ SOÁT SỔ SÁCH THÔI!";
+            noiDung = `Chào buổi chiều Tú Trinh! Sắp hết giờ làm việc hành chính rồi (${gioThat}), Trinh kiểm tra xem hôm nay có lịch tăng ca không để lát nữa mình chuẩn bị nhảy số cộng dồn giờ lương nha! ✨`;
+        } else {
+            // Trường hợp buổi tối và đêm (Từ 18h tối đến trước 5h sáng hôm sau)
+            tieuDe = "🌌 TÚ TRINH XINH ĐẸP ƠI...";
+            noiDung = `Chào Tú Trinh xinh đẹp, hôm nay tăng ca về trễ vậy <b style="color:#0057d9; font-size:14px;">[${gioThat}]</b> tối lắm rồi có mệt lắm không Trinh! Kêu Phục bóp chân, đấm lưng cho Trinh nghe!! 😊❤️`;
+        }
+
+        bTitle.innerHTML = tieuDe;
+        bText.innerHTML = noiDung;
+        
+        // Kích hoạt làm mờ trang nền và đẩy bảng thông báo nảy lên màn hình
+        overlay.classList.add('show');
+    }
+
+    function dongBangThongBaoChaoMung() {
+        const overlay = document.getElementById('welcomeOverlay');
+        if(overlay) overlay.classList.remove('show');
+    }
+
+       
+</script>
+
 </body>
 </html>
